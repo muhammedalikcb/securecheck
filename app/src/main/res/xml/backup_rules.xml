@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content xmlns:tools="http://schemas.android.com/tools">
+    <!-- secure_prefs hariç tüm sharedPrefs yedeklenebilir -->
+    <exclude domain="sharedpref" path="secure_prefs.xml"
+        tools:ignore="FullBackupContent" />
+
+    <!-- Uygulama ayarlarını içeren prefs dosyası yedeklenebilir -->
+    <include domain="sharedpref" path="user_settings.xml"/>
+
+    <!-- secure_data.txt gibi hassas şifreli dosyalar hariç tutulmalı -->
+    <exclude domain="file" path="secure_data.txt"
+        tools:ignore="FullBackupContent" />
+</full-backup-content>

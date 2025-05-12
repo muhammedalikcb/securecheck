@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SecureCheck</string>
+
+    <string name="danger_root">Root access detected</string>
+    <string name="suggestion_root">Device should not be rooted. Consider flashing official ROM.</string>
+
+    <string name="danger_debugger">App is running in debug mode</string>
+    <string name="suggestion_debugger">Rebuild app in release mode for security.</string>
+
+    <string name="danger_installer">Installed from outside Google Play</string>
+    <string name="suggestion_installer">Install only via Google Play for integrity checks.</string>
+
+    <string name="danger_signature">Signature verification failed</string>
+    <string name="suggestion_signature">APK signature could not be verified.</string>
+
+    <string name="danger_safetynet">SafetyNet validation failed</string>
+    <string name="suggestion_safetynet">Device failed SafetyNet checks.</string>
+
+    <string name="danger_integrity">Play Integrity failed</string>
+    <string name="suggestion_integrity">Device may be tampered or untrusted.</string>
+
+    <string name="danger_tamper">APK tampering detected</string>
+    <string name="suggestion_tamper">APK may have been altered or repacked.</string>
+
+    <string name="danger_obfuscation">Code is not obfuscated</string>
+    <string name="suggestion_obfuscation">Consider enabling ProGuard or R8 to protect code.</string>
+
+    <string name="danger_storage">Encrypted storage not detected</string>
+    <string name="suggestion_storage">Use EncryptedFile or EncryptedSharedPreferences.</string>
+
+    <string name="danger_exported">Exported components detected</string>
+    <string name="suggestion_exported">Restrict component visibility in AndroidManifest.</string>
+
+    <string name="danger_pending_intent">PendingIntent is not immutable</string>
+    <string name="suggestion_pending_intent">Add FLAG_IMMUTABLE for security best practice.</string>
+
+    <string name="danger_ssl_pinning">SSL pinning failed</string>
+    <string name="suggestion_ssl_pinning">Server certificate could not be validated.</string>
+
+    <string name="danger_intent_hijack">Intent might be hijackable</string>
+    <string name="suggestion_intent_hijack">Use explicit intents or restrict intent filters.</string>
+
+    <string name="danger_debuggable">App is debuggable</string>
+    <string name="suggestion_debuggable">Remove debuggable=true from manifest.</string>
+
+    <string name="danger_dex">Dex file loaded dynamically</string>
+    <string name="suggestion_dex">Avoid dynamic code loading for better security.</string>
+
+    <string name="danger_reflection">Reflection detected</string>
+    <string name="suggestion_reflection">Avoid excessive use of reflection.</string>
+
+    <string name="danger_frida">Frida hook traces found</string>
+    <string name="suggestion_frida">Frida framework may be active on device.</string>
+
+    <string name="danger_xposed_check">Xposed detected</string>
+    <string name="suggestion_xposed_check">App may be running in an unsafe environment.</string>
+
+    <string name="danger_webview_js">WebView JavaScript enabled</string>
+    <string name="suggestion_webview_js">Disable JavaScript unless necessary.</string>
+
+    <string name="danger_webview_file">WebView file access allowed</string>
+    <string name="suggestion_webview_file">Restrict file access for security.</string>
+
+    <string name="danger_webview_interface">Insecure JS interface found</string>
+    <string name="suggestion_webview_interface">Review JS interfaces for security leaks.</string>
+
+    <string name="export_report">Export Report</string>
+</resources>

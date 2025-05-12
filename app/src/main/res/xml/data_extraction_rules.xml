@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Güvenlik gerekçesiyle şifreli dosyalar ve hassas ayarlar hariç tutulur -->
+        <exclude domain="file" path="secure_data.txt"/>
+        <exclude domain="sharedpref" path="secure_prefs.xml"/>
+    </cloud-backup>
+
+    <device-transfer>
+        <!-- Yalnızca kullanıcı ayarları taşınır (dark tema vs.) -->
+        <include domain="sharedpref" path="user_settings.xml"/>
+    </device-transfer>
+
+    <exclude domain="file" path="security_log.json" />
+</data-extraction-rules>

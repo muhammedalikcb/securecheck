@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SecureCheck</string>
+
+    <string name="danger_root">Root erişimi tespit edildi</string>
+    <string name="suggestion_root">Cihaz root edilmemeli, resmi ROM yüklenmeli.</string>
+
+    <string name="danger_debugger">Uygulama debug modunda çalışıyor</string>
+    <string name="suggestion_debugger">Güvenlik için release modda derlenmeli.</string>
+
+    <string name="danger_installer">Google Play dışından yüklenmiş</string>
+    <string name="suggestion_installer">Sadece Google Play üzerinden yüklenmeli.</string>
+
+    <string name="danger_signature">İmza doğrulaması başarısız</string>
+    <string name="suggestion_signature">APK imzası doğrulanamadı.</string>
+
+    <string name="danger_safetynet">SafetyNet doğrulaması başarısız</string>
+    <string name="suggestion_safetynet">Cihaz SafetyNet testinden geçemedi.</string>
+
+    <string name="danger_integrity">Play Integrity kontrolü başarısız</string>
+    <string name="suggestion_integrity">Cihaz güvenilir olmayabilir.</string>
+
+    <string name="danger_tamper">APK üzerinde değişiklik tespit edildi</string>
+    <string name="suggestion_tamper">APK değişmiş veya yeniden paketlenmiş olabilir.</string>
+
+    <string name="danger_obfuscation">Kod obfuscation eksik</string>
+    <string name="suggestion_obfuscation">ProGuard/R8 kullanarak kod gizleme önerilir.</string>
+
+    <string name="danger_storage">Şifreli depolama yok</string>
+    <string name="suggestion_storage">EncryptedFile veya EncryptedSharedPreferences kullanılmalı.</string>
+
+    <string name="danger_exported">Exported componentler tespit edildi</string>
+    <string name="suggestion_exported">Manifestteki görünürlükleri sınırla.</string>
+
+    <string name="danger_pending_intent">PendingIntent immutable değil</string>
+    <string name="suggestion_pending_intent">FLAG_IMMUTABLE kullanılmalı.</string>
+
+    <string name="danger_ssl_pinning">SSL Pinning başarısız</string>
+    <string name="suggestion_ssl_pinning">Sunucu sertifikası doğrulanamadı.</string>
+
+    <string name="danger_intent_hijack">Intent kaçırma riski var</string>
+    <string name="suggestion_intent_hijack">Açık intent filtreleri sınırlandırılmalı.</string>
+
+    <string name="danger_debuggable">Uygulama debug build</string>
+    <string name="suggestion_debuggable">debuggable=true kaldırılmalı.</string>
+
+    <string name="danger_dex">Dinamik Dex yüklemesi tespit edildi</string>
+    <string name="suggestion_dex">Güvenlik için dinamik kod yüklemesinden kaçının.</string>
+
+    <string name="danger_reflection">Reflection kullanımı tespit edildi</string>
+    <string name="suggestion_reflection">Reflection kullanımı minimize edilmeli.</string>
+
+    <string name="danger_frida">Frida izleri tespit edildi</string>
+    <string name="suggestion_frida">Cihazda Frida çalışıyor olabilir.</string>
+
+    <string name="danger_xposed_check">Xposed tespit edildi</string>
+    <string name="suggestion_xposed_check">Güvenli olmayan bir ortam olabilir.</string>
+
+    <string name="danger_webview_js">WebView JavaScript etkin</string>
+    <string name="suggestion_webview_js">JavaScript sadece gerektiğinde açılmalı.</string>
+
+    <string name="danger_webview_file">WebView dosya erişimi açık</string>
+    <string name="suggestion_webview_file">Dosya erişimi kapatılmalı.</string>
+
+    <string name="danger_webview_interface">Güvensiz JS interface bulundu</string>
+    <string name="suggestion_webview_interface">JS interfaceler kontrol edilmeli.</string>
+
+    <string name="export_report">Raporu Dışa Aktar</string>
+
+</resources>

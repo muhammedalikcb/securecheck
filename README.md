@@ -1,5 +1,11 @@
 # SecureCheck
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)
+![minSdk](https://img.shields.io/badge/minSdk-24-3DDC84?logo=android&logoColor=white)
+![targetSdk](https://img.shields.io/badge/targetSdk-35-3DDC84?logo=android&logoColor=white)
+[![GitHub stars](https://img.shields.io/github/stars/muhammedalikcb/securecheck?style=social)](https://github.com/muhammedalikcb/securecheck/stargazers)
+
 > **Modular Android Security Showcase** | MVVM + Clean Architecture + Dagger 2 + 25+ Production-grade security validation checks
 > Implements real-world Android security strategies using structured architecture and modular design
 
@@ -14,9 +20,11 @@ SecureCheck is a modular, open-source Android application built to evaluate devi
 * [Architecture](#architecture)
 * [Security Checks](#security-checks)
 * [Testing & Debug](#testing--debug)
+* [Reporting](#reporting)
 * [Project Structure](#project-structure)
 * [Internationalization (i18n)](#internationalization-i18n)
 * [Contribution](#contribution)
+* [Roadmap (V2 & Beyond)](#roadmap-v2--beyond)
 * [License](#license)
 * [Türkçe Açıklama](#türkçe-açıklama)
 
@@ -45,6 +53,8 @@ SecureCheck is a modular, open-source Android application built to evaluate devi
 All results are structured under a unified SecurityState model, which can be exported for audit or diagnostics.
 
 ---
+
+## Screenshots
 
 <table>
   <tr>

@@ -68,12 +68,12 @@ All results are structured under a unified SecurityState model, which can be exp
 ## Setup & Run
 
 ```bash
-git clone https://github.com/muhammedalikocabey/securecheck.git
+git clone https://github.com/muhammedalikcb/securecheck.git
 cd securecheck
 ./gradlew clean assembleDebug
 ```
 
-Security checks are triggered automatically at app launch via `MainActivity.kt
+Security checks are triggered automatically at app launch via `MainActivity.kt`.
 
 ---
 
@@ -257,7 +257,7 @@ copies of the Software...
 
 ---
 
-**Maintainer:** [Muhammed Ali Kocabey](https://github.com/muhammedalikocabey)  
+**Maintainer:** [Muhammed Ali Kocabey](https://github.com/muhammedalikcb)  
 [muhammedalikocabey.com](https://muhammedalikocabey.com)  
 [Shaping the Future of Android – Spotify Podcast](https://open.spotify.com/show/7waAQAWmr2WIQNTlTJkkos)  
 [Medium Articles](https://medium.com/@muhammedalikocabey)
@@ -309,7 +309,7 @@ Uygulama açıldığında `MainActivity.kt` içinde `SecurityViewModel` tetiklen
 ### Kurulum ve Çalıştırma
 
 ```bash
-git clone https://github.com/muhammedalikocabey/securecheck.git
+git clone https://github.com/muhammedalikcb/securecheck.git
 cd securecheck
 ./gradlew clean assembleDebug
 ```
@@ -385,7 +385,7 @@ Bu kontroller `core/advanced/` altında tanımlanacak ve `CompositeCheckSecurity
 
 MIT Lisansı altında açık kaynaklı olarak yayınlanmaktadır.
 
-Geliştirici: [Muhammed Ali Kocabey](https://github.com/muhammedalikocabey)  
+Geliştirici: [Muhammed Ali Kocabey](https://github.com/muhammedalikcb)  
 [muhammedalikocabey.com](https://muhammedalikocabey.com)  
 [Shaping the Future of Android – Spotify Podcast](https://open.spotify.com/show/7waAQAWmr2WIQNTlTJkkos?si=7ee4f7c0487d40f0)
 [Medium](https://medium.com/@muhammedalikocabey)

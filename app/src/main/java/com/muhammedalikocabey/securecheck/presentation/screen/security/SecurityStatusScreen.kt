@@ -1,5 +1,6 @@
 package com.muhammedalikocabey.securecheck.presentation.screen.security
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -172,6 +173,23 @@ fun SecurityCheckItem(item: SecurityCheckItemModel) {
 }
 
 /**
+ * Kontrol sonucuna göre güvenli ya da riskli etiketi seçerek liste öğesi üretir
+ *
+ * Builds a list item, picking the safe or the danger label based on the check result
+ */
+@Composable
+private fun checkItem(
+    isSafe: Boolean,
+    @StringRes safeLabel: Int,
+    @StringRes dangerLabel: Int,
+    @StringRes suggestion: Int
+) = SecurityCheckItemModel(
+    label = stringResource(if (isSafe) safeLabel else dangerLabel),
+    isSafe = isSafe,
+    suggestion = stringResource(suggestion)
+)
+
+/**
  * Tüm SecurityState verilerini alarak tek tek UI öğesi olarak çizer
  *
  * Renders all checks from SecurityState as a scrollable list
@@ -179,110 +197,30 @@ fun SecurityCheckItem(item: SecurityCheckItemModel) {
 @Composable
 fun RenderAllSecurityChecks(state: SecurityState) {
     val items = listOf(
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_root),
-            isSafe = !state.isRooted,
-            suggestion = stringResource(R.string.suggestion_root)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_debugger),
-            isSafe = !state.isDebuggerAttached,
-            suggestion = stringResource(R.string.suggestion_debugger)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_installer),
-            isSafe = state.isFromPlayStore,
-            suggestion = stringResource(R.string.suggestion_installer)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_signature),
-            isSafe = state.isSignatureValid,
-            suggestion = stringResource(R.string.suggestion_signature)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_integrity),
-            isSafe = state.isGenuine,
-            suggestion = stringResource(R.string.suggestion_integrity)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_tamper),
-            isSafe = !state.isTampered,
-            suggestion = stringResource(R.string.suggestion_tamper)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_obfuscation),
-            isSafe = state.isObfuscated,
-            suggestion = stringResource(R.string.suggestion_obfuscation)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_storage),
-            isSafe = state.isStorageEncrypted,
-            suggestion = stringResource(R.string.suggestion_storage)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_exported),
-            isSafe = !state.hasExportedComponents,
-            suggestion = stringResource(R.string.suggestion_exported)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_pending_intent),
-            isSafe = state.isSafePendingIntent,
-            suggestion = stringResource(R.string.suggestion_pending_intent)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_ssl_pinning),
-            isSafe = state.isSslPinningPassed,
-            suggestion = stringResource(R.string.suggestion_ssl_pinning)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_intent_hijack),
-            isSafe = !state.isIntentHijackable,
-            suggestion = stringResource(R.string.suggestion_intent_hijack)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_debuggable),
-            isSafe = !state.isDebuggable,
-            suggestion = stringResource(R.string.suggestion_debuggable)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_dex),
-            isSafe = !state.isDexLoaded,
-            suggestion = stringResource(R.string.suggestion_dex)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_reflection),
-            isSafe = !state.isReflectionUsed,
-            suggestion = stringResource(R.string.suggestion_reflection)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_frida),
-            isSafe = !state.isFridaDetected,
-            suggestion = stringResource(R.string.suggestion_frida)
-        ),
-        SecurityCheckItemModel(
-            label = stringResource(R.string.danger_xposed_check),
-            isSafe = !state.isXposed,
-            suggestion = stringResource(R.string.suggestion_xposed_check)
-        )
+        checkItem(!state.isRooted, R.string.safe_root, R.string.danger_root, R.string.suggestion_root),
+        checkItem(!state.isDebuggerAttached, R.string.safe_debugger, R.string.danger_debugger, R.string.suggestion_debugger),
+        checkItem(state.isFromPlayStore, R.string.safe_installer, R.string.danger_installer, R.string.suggestion_installer),
+        checkItem(state.isSignatureValid, R.string.safe_signature, R.string.danger_signature, R.string.suggestion_signature),
+        checkItem(state.isGenuine, R.string.safe_integrity, R.string.danger_integrity, R.string.suggestion_integrity),
+        checkItem(!state.isTampered, R.string.safe_tamper, R.string.danger_tamper, R.string.suggestion_tamper),
+        checkItem(state.isObfuscated, R.string.safe_obfuscation, R.string.danger_obfuscation, R.string.suggestion_obfuscation),
+        checkItem(state.isStorageEncrypted, R.string.safe_storage, R.string.danger_storage, R.string.suggestion_storage),
+        checkItem(!state.hasExportedComponents, R.string.safe_exported, R.string.danger_exported, R.string.suggestion_exported),
+        checkItem(state.isSafePendingIntent, R.string.safe_pending_intent, R.string.danger_pending_intent, R.string.suggestion_pending_intent),
+        checkItem(state.isSslPinningPassed, R.string.safe_ssl_pinning, R.string.danger_ssl_pinning, R.string.suggestion_ssl_pinning),
+        checkItem(!state.isIntentHijackable, R.string.safe_intent_hijack, R.string.danger_intent_hijack, R.string.suggestion_intent_hijack),
+        checkItem(!state.isDebuggable, R.string.safe_debuggable, R.string.danger_debuggable, R.string.suggestion_debuggable),
+        checkItem(!state.isDexLoaded, R.string.safe_dex, R.string.danger_dex, R.string.suggestion_dex),
+        checkItem(!state.isReflectionUsed, R.string.safe_reflection, R.string.danger_reflection, R.string.suggestion_reflection),
+        checkItem(!state.isFridaDetected, R.string.safe_frida, R.string.danger_frida, R.string.suggestion_frida),
+        checkItem(!state.isXposed, R.string.safe_xposed_check, R.string.danger_xposed_check, R.string.suggestion_xposed_check)
     )
 
     val webViewItems = state.webViewSecurity?.let { web ->
         listOf(
-            SecurityCheckItemModel(
-                label = stringResource(R.string.danger_webview_js),
-                isSafe = !web.isJsEnabled,
-                suggestion = stringResource(R.string.suggestion_webview_js)
-            ),
-            SecurityCheckItemModel(
-                label = stringResource(R.string.danger_webview_file),
-                isSafe = !web.isFileAccessAllowed,
-                suggestion = stringResource(R.string.suggestion_webview_file)
-            ),
-            SecurityCheckItemModel(
-                label = stringResource(R.string.danger_webview_interface),
-                isSafe = !web.hasInsecureJsInterface,
-                suggestion = stringResource(R.string.suggestion_webview_interface)
-            )
+            checkItem(!web.isJsEnabled, R.string.safe_webview_js, R.string.danger_webview_js, R.string.suggestion_webview_js),
+            checkItem(!web.isFileAccessAllowed, R.string.safe_webview_file, R.string.danger_webview_file, R.string.suggestion_webview_file),
+            checkItem(!web.hasInsecureJsInterface, R.string.safe_webview_interface, R.string.danger_webview_interface, R.string.suggestion_webview_interface)
         )
     } ?: emptyList()
 
@@ -297,7 +235,7 @@ fun PreviewSecurityCheckItemSafe() {
     SecureCheckTheme {
         SecurityCheckItem(
             SecurityCheckItemModel(
-                label = stringResource(R.string.danger_root),
+                label = stringResource(R.string.safe_root),
                 isSafe = true,
                 suggestion = stringResource(R.string.suggestion_root)
             )

@@ -32,7 +32,6 @@ class CompositeCheckSecurityUseCase @Inject constructor(
         val isDebuggerAttached = input.checkDebuggerStatus()
         val isFromPlayStore = input.checkInstaller(context)
         val isSignatureValid = input.checkSignature(context)
-        val (cts, integrity) = input.checkSafetyNet(context)
         val isGenuine = input.checkPlayIntegrity(context)
         val isTampered = input.checkTamperStatus(context)
         val isObfuscationDetected = input.checkObfuscationStatus()
@@ -58,8 +57,6 @@ class CompositeCheckSecurityUseCase @Inject constructor(
             isDebuggerAttached = isDebuggerAttached,
             isFromPlayStore = isFromPlayStore,
             isSignatureValid = isSignatureValid,
-            ctsProfileMatch = cts,
-            basicIntegrity = integrity,
             isGenuine = isGenuine,
             isTampered = isTampered,
             isObfuscated = isObfuscationDetected,

@@ -14,8 +14,6 @@
     <string name="danger_signature">Signature verification failed</string>
     <string name="suggestion_signature">APK signature could not be verified.</string>
 
-    <string name="danger_safetynet">SafetyNet validation failed</string>
-    <string name="suggestion_safetynet">Device failed SafetyNet checks.</string>
 
     <string name="danger_integrity">Play Integrity failed</string>
     <string name="suggestion_integrity">Device may be tampered or untrusted.</string>

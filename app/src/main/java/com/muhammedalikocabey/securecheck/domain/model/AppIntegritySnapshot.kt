@@ -30,8 +30,6 @@ class AppIntegritySnapshot @Inject constructor() {
             put("isDebuggerAttached", state.isDebuggerAttached)
             put("isFromPlayStore", state.isFromPlayStore)
             put("isSignatureValid", state.isSignatureValid)
-            put("ctsProfileMatch", state.ctsProfileMatch)
-            put("basicIntegrity", state.basicIntegrity)
             put("isGenuine", state.isGenuine)
             put("isTampered", state.isTampered)
             put("isObfuscationDetected", state.isObfuscated)

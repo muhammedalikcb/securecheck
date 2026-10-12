@@ -200,11 +200,6 @@ fun RenderAllSecurityChecks(state: SecurityState) {
             suggestion = stringResource(R.string.suggestion_signature)
         ),
         SecurityCheckItemModel(
-            label = stringResource(R.string.danger_safetynet),
-            isSafe = state.ctsProfileMatch && state.basicIntegrity,
-            suggestion = stringResource(R.string.suggestion_safetynet)
-        ),
-        SecurityCheckItemModel(
             label = stringResource(R.string.danger_integrity),
             isSafe = state.isGenuine,
             suggestion = stringResource(R.string.suggestion_integrity)

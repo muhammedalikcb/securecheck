@@ -5,10 +5,16 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-val releaseStoreFile = project.findProperty("RELEASE_STORE_FILE") as String
-val releaseStorePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String
-val releaseKeyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String
-val releaseKeyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String
+// Release signing is read from ~/.gradle/gradle.properties or environment variables, never from the repo.
+// Without it, release builds fall back to the debug key so the project still builds for everyone.
+fun signingValue(name: String): String? =
+    providers.gradleProperty(name).orNull ?: providers.environmentVariable(name).orNull
+
+val releaseStoreFile = signingValue("RELEASE_STORE_FILE")
+val releaseStorePassword = signingValue("RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = signingValue("RELEASE_KEY_ALIAS")
+val releaseKeyPassword = signingValue("RELEASE_KEY_PASSWORD")
+val hasReleaseSigning = listOf(releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword).all { it != null }
 
 
 android {
@@ -16,7 +22,6 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        buildConfigField("String", "SAFETYNET_API_KEY", "\"Think_Of_It_As_A_Real_API_Key\"")
         applicationId = "com.muhammedalikocabey.securecheck"
         minSdk = 24
         targetSdk = 35
@@ -27,11 +32,13 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = File(releaseStoreFile)
-            storePassword = releaseStorePassword
-            keyAlias = releaseKeyAlias
-            keyPassword = releaseKeyPassword
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
 
@@ -39,7 +46,7 @@ android {
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -61,9 +68,6 @@ android {
 }
 
 dependencies {
-
-    // SafetyNet
-    implementation(libs.play.services.safetynet)
 
     // Integrity API
     implementation(libs.play.integrity.api)

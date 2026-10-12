@@ -77,3 +77,6 @@ test-output/
 /app/release/baselineProfiles/1/app-release.dm
 /app/release/baselineProfiles/0/app-release.dm
 /local.properties
+
+# Public demo certificate used by the SSL pinning check (no private key)
+!app/src/main/res/raw/securecheck_cert.cer

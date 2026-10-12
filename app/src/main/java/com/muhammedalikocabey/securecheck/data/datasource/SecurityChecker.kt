@@ -6,16 +6,15 @@ import com.muhammedalikocabey.securecheck.data.detector.debugger.IDebuggerDetect
 import com.muhammedalikocabey.securecheck.data.detector.installer.IInstallerValidator
 import com.muhammedalikocabey.securecheck.data.detector.integrity.IPlayIntegrityValidator
 import com.muhammedalikocabey.securecheck.data.detector.root.IRootDetector
-import com.muhammedalikocabey.securecheck.data.detector.safetynet.ISafetyNetValidator
 import com.muhammedalikocabey.securecheck.data.detector.signature.ISignatureValidator
 import com.muhammedalikocabey.securecheck.data.detector.tamper.ITamperDetector
 
 /**
  * Uygulamanın güvenlik durumunu çeşitli dedektör sınıflarını kullanarak kontrol eden merkez sınıf.
- * Root, debugger, installer, imza, tamper, SafetyNet ve Play Integrity gibi birçok kontrolü içerir.
+ * Root, debugger, installer, imza, tamper ve Play Integrity gibi birçok kontrolü içerir.
  *
  * Centralized class responsible for checking the app’s security posture.
- * Performs validations such as root, debugger, installer, signature, tampering, SafetyNet and Play Integrity.
+ * Performs validations such as root, debugger, installer, signature, tampering and Play Integrity.
  *
  * Bu sınıf tüm UseCase'ler tarafından kullanılır ve soyut bir güvenlik API'si olarak görev yapar.
  *
@@ -30,8 +29,7 @@ class SecurityChecker @Inject constructor(
     private val debuggerDetector: IDebuggerDetector,
     private val installerValidator: IInstallerValidator,
     private val tamperDetector: ITamperDetector,
-    private val playIntegrityValidator: IPlayIntegrityValidator,
-    private val safetyNetValidator: ISafetyNetValidator
+    private val playIntegrityValidator: IPlayIntegrityValidator
 ) {
     /** Root erişimi var mı kontrol eder / Checks for root access. */
     fun isRooted(): Boolean = rootDetector.isRooted()
@@ -50,8 +48,4 @@ class SecurityChecker @Inject constructor(
 
     /** Play Integrity API sonucunu döner / Executes Play Integrity. */
     suspend fun checkPlayIntegrity(context: Context): Boolean = playIntegrityValidator.checkPlayIntegrity(context)
-
-    /** SafetyNet API sonucunu döner / Executes SafetyNet validation. */
-    suspend fun performSafetyNet(context: Context): Pair<Boolean, Boolean> =
-        safetyNetValidator.performSafetyNet(context)
 }

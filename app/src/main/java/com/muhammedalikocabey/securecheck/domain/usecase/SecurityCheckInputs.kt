@@ -17,7 +17,6 @@ data class SecurityCheckInputs(
     val checkPendingIntentLeak: CheckPendingIntentLeakUseCase,
     val checkPlayIntegrity: CheckPlayIntegrityUseCase,
     val checkRootStatus: CheckRootStatusUseCase,
-    val checkSafetyNet: CheckSafetyNetUseCase,
     val checkSignature: CheckSignatureUseCase,
     val checkSslPinning: CheckSslPinningUseCase,
     val checkStorageEncrypted: CheckStorageEncryptedUseCase,

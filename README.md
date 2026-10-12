@@ -1,6 +1,7 @@
 # SecureCheck
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/muhammedalikcb/securecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/muhammedalikcb/securecheck/actions/workflows/ci.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)
 ![minSdk](https://img.shields.io/badge/minSdk-24-3DDC84?logo=android&logoColor=white)
 ![targetSdk](https://img.shields.io/badge/targetSdk-35-3DDC84?logo=android&logoColor=white)
@@ -10,7 +11,7 @@
 > Implements real-world Android security strategies using structured architecture and modular design
 
 
-SecureCheck is a modular, open-source Android application built to evaluate device and app integrity through over 25 runtime and system-level security checks, including Root, Debugger, Play Integrity, SafetyNet, SSL Pinning, and Frida/Xposed detection.
+SecureCheck is a modular, open-source Android application built to evaluate device and app integrity through over 25 runtime and system-level security checks, including Root, Debugger, Play Integrity, SSL Pinning, and Frida/Xposed detection.
 
 ## Table of Contents
 
@@ -40,7 +41,6 @@ SecureCheck is a modular, open-source Android application built to evaluate devi
 | Tamper Detection         | Detects APK repacking or build tampering                                                 |
 | Obfuscation Check        | Ensures code is protected via ProGuard/R8                                                |
 | Play Integrity API       | Uses official serverless API to verify genuine state                                     |
-| SafetyNet Check          | Verifies CTS Profile & Basic Integrity                                                   |
 | Exported Components      | Detects exported components in AndroidManifest                                           |
 | PendingIntent Leak       | Detects unsafe FLAG\_MUTABLE usage                                                       |
 | SSL Pinning              | Validates HTTPS via embedded certificate                                                 |
@@ -72,6 +72,12 @@ All results are structured under a unified SecurityState model, which can be exp
     </td>
   </tr>
 </table>
+
+---
+
+## Download
+
+Grab the signed APK from the [latest release](https://github.com/muhammedalikcb/securecheck/releases/latest) and install it on a device to see the checks without building the project.
 
 ---
 
@@ -113,7 +119,6 @@ app/
 
 Security checks are centralized in `CompositeCheckSecurityUseCase`. Each module is responsible for a single aspect (e.g., root, debugger, VPN):
 
-- [SafetyNet Attestation](https://developer.android.com/training/safetynet/attestation)
 - [Play Integrity API](https://developer.android.com/google/play/integrity)
 
 ```kotlin
@@ -285,7 +290,7 @@ Kurumsal güvenlik standartlarına uygun olarak tasarlanmıştır ve 25'ten fazl
 ### Öne Çıkan Özellikler
 
 * Root, Debugger, Emulator, Frida, Xposed tespiti
-* Play Integrity ve SafetyNet doğrulamaları
+* Play Integrity doğrulaması
 * APK imzası ve obfuscation (ProGuard/R8) kontrolleri
 * SSL Pinning (.crt ile doğrulama)
 * WebView JS güvenliği ve FLAG\_MUTABLE tespiti

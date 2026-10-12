@@ -26,7 +26,6 @@ import com.muhammedalikocabey.securecheck.domain.usecase.CheckDebuggerStatusUseC
 import com.muhammedalikocabey.securecheck.domain.usecase.CheckInstallerUseCase
 import com.muhammedalikocabey.securecheck.domain.usecase.CheckPlayIntegrityUseCase
 import com.muhammedalikocabey.securecheck.domain.usecase.CheckRootStatusUseCase
-import com.muhammedalikocabey.securecheck.domain.usecase.CheckSafetyNetUseCase
 import com.muhammedalikocabey.securecheck.domain.usecase.CheckSignatureUseCase
 import com.muhammedalikocabey.securecheck.domain.usecase.CheckTamperStatusUseCase
 import com.muhammedalikocabey.securecheck.core.reflection.ReflectionUsageDetector
@@ -38,8 +37,6 @@ import com.muhammedalikocabey.securecheck.data.detector.integrity.IPlayIntegrity
 import com.muhammedalikocabey.securecheck.data.detector.integrity.PlayIntegrityValidatorImpl
 import com.muhammedalikocabey.securecheck.data.detector.root.IRootDetector
 import com.muhammedalikocabey.securecheck.data.detector.root.RootDetectorImpl
-import com.muhammedalikocabey.securecheck.data.detector.safetynet.ISafetyNetValidator
-import com.muhammedalikocabey.securecheck.data.detector.safetynet.SafetyNetValidatorImpl
 import com.muhammedalikocabey.securecheck.data.detector.signature.SignatureValidatorImpl
 import com.muhammedalikocabey.securecheck.data.detector.tamper.ITamperDetector
 import com.muhammedalikocabey.securecheck.data.detector.tamper.TamperDetectorImpl
@@ -172,9 +169,6 @@ class CheckerModule {
     fun provideCheckTamperStatusUseCase(checker: SecurityChecker) = CheckTamperStatusUseCase(checker)
 
     @Provides
-    fun provideCheckSafetyNetUseCase(checker: SecurityChecker) = CheckSafetyNetUseCase(checker)
-
-    @Provides
     fun provideCheckPlayIntegrityUseCase(checker: SecurityChecker) = CheckPlayIntegrityUseCase(checker)
 
     @Provides
@@ -245,21 +239,16 @@ class CheckerModule {
 
     @Provides
     @Singleton
-    fun provideSafetyNetValidator(): ISafetyNetValidator = SafetyNetValidatorImpl()
-
-    @Provides
-    @Singleton
     fun provideSecurityChecker(
         rootDetector: IRootDetector,
         signatureValidator: ISignatureValidator,
         debuggerDetector: IDebuggerDetector,
         installerValidator: IInstallerValidator,
         tamperDetector: ITamperDetector,
-        playIntegrityValidator: IPlayIntegrityValidator,
-        safetyNetValidator: ISafetyNetValidator
+        playIntegrityValidator: IPlayIntegrityValidator
     ): SecurityChecker = SecurityChecker(
         rootDetector, signatureValidator, debuggerDetector,
-        installerValidator, tamperDetector, playIntegrityValidator, safetyNetValidator
+        installerValidator, tamperDetector, playIntegrityValidator
     )
 
     @Provides

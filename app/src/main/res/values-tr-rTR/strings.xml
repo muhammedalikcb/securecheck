@@ -14,8 +14,6 @@
     <string name="danger_signature">İmza doğrulaması başarısız</string>
     <string name="suggestion_signature">APK imzası doğrulanamadı.</string>
 
-    <string name="danger_safetynet">SafetyNet doğrulaması başarısız</string>
-    <string name="suggestion_safetynet">Cihaz SafetyNet testinden geçemedi.</string>
 
     <string name="danger_integrity">Play Integrity kontrolü başarısız</string>
     <string name="suggestion_integrity">Cihaz güvenilir olmayabilir.</string>

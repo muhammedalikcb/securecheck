@@ -2,6 +2,7 @@ package com.muhammedalikocabey.securecheck.presentation.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -120,6 +121,8 @@ fun DetailSheet(result: CheckResult, onDismiss: () -> Unit, onRerun: () -> Unit)
                     TextButton(
                         onClick = { runCatching { uriHandler.openUri("$MASVS_CONTROLS$control/") } },
                         modifier = Modifier.heightIn(min = 48.dp),
+                        // No start padding, so the label lines up with the text above it.
+                        contentPadding = PaddingValues(end = 12.dp),
                     ) { Text(stringResource(R.string.action_open_standard)) }
                 }
             }

@@ -1,5 +1,6 @@
 package com.muhammedalikocabey.securecheck.presentation.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +18,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -98,6 +101,8 @@ fun SettingsScreen(
                 OutlinedButton(
                     onClick = { confirmClear = true },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 ) { Text(stringResource(R.string.settings_clear)) }
             }
 
@@ -143,10 +148,13 @@ fun SettingsScreen(
             title = { Text(stringResource(R.string.settings_clear_title)) },
             text = { Text(stringResource(R.string.settings_clear_body)) },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmClear = false
-                    actions.onClearHistory()
-                }) { Text(stringResource(R.string.settings_delete)) }
+                TextButton(
+                    onClick = {
+                        confirmClear = false
+                        actions.onClearHistory()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.settings_delete)) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.settings_cancel)) }
@@ -199,7 +207,17 @@ private fun SwitchRow(
             RowDescription(description)
         }
         Spacer(Modifier.width(16.dp))
-        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            enabled = enabled,
+            // The default off state is a pale track on a pale card; give it a visible edge.
+            colors = SwitchDefaults.colors(
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        )
     }
 }
 

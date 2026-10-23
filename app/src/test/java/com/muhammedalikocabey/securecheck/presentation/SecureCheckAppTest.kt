@@ -40,6 +40,9 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
+/** 2026-10-23 09:41 UTC, so the history screenshot shows a plausible date. */
+private const val SAMPLE_SCAN_MS = 1_792_748_460_000L
+
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "w411dp-h891dp-xxhdpi")
@@ -63,7 +66,7 @@ class SecureCheckAppTest {
         }
         return ScanReport(
             id = "sample",
-            startedAtMs = 0,
+            startedAtMs = SAMPLE_SCAN_MS,
             durationMs = 1_200,
             device = DeviceSummary("Google", "Pixel 8", "15", 35, "2025-05-05"),
             app = AppSummary("2.0.0", 1, debug),
@@ -204,7 +207,7 @@ class SecureCheckAppTest {
     @Test
     fun `toolbar opens history and back returns to the dashboard`() {
         val newer = sampleReport()
-        val older = sampleReport().copy(id = "older", startedAtMs = -86_400_000)
+        val older = sampleReport().copy(id = "older", startedAtMs = SAMPLE_SCAN_MS - 86_400_000)
         var opened = 0
         showWith(ScanUiState.Done(newer), listOf(newer, older), actions = AppActions(onOpenHistory = { opened++ }))
         rule.onNodeWithContentDescription(string(R.string.action_history)).performClick()

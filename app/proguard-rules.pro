@@ -1,24 +1,14 @@
-# Gerekli tutulan SDK sınıfları
--keep class androidx.security.crypto.** { *; }
--keep class com.google.android.gms.safetynet.** { *; }
--keep class com.google.android.play.** { *; }
--keep class com.muhammedalikocabey.securecheck.domain.model.** { *; }
--keep class java.security.cert.** { *; }
--keep class javax.net.ssl.** { *; }
--keep class com.muhammedalikocabey.securecheck.core.network.PinningTrustManager { *; }
+# Library entry points that are loaded reflectively.
+-keep class com.google.android.play.core.integrity.** { *; }
 
-# WebView JS interface güvenliği için
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
+# Report models are serialized with kotlinx.serialization.
+-keepattributes *Annotation*, InnerClasses
+-keepclassmembers class com.muhammedalikocabey.securecheck.**$$serializer { *; }
+-keepclassmembers class com.muhammedalikocabey.securecheck.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.muhammedalikocabey.securecheck.** {
+    kotlinx.serialization.KSerializer serializer(...);
 }
 
-# SAFETYNET API KEY'i korumak için
--keepclassmembers class **.BuildConfig {
-    public static final *** SAFETYNET_API_KEY;
-}
-
-# intentionally obfuscate edilen sınıf → *tutulmasın*
-# Bu sınıf silinirse obfuscation yapılmış sayacağız
-# Bu yüzden *kasti olarak* -keep verilmez!
-# -dontwarn verilebilir.
--dontwarn com.muhammedalikocabey.securecheck.domain.fake.IntentionallyMissingClass
+# ObfuscationProbe is deliberately not kept: the code-shrinking check reads its renamed class name at runtime.

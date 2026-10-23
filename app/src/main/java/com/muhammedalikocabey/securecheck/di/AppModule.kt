@@ -1,38 +1,94 @@
 package com.muhammedalikocabey.securecheck.di
 
-import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
-import com.muhammedalikocabey.securecheck.data.log.SecurityLogExporter
-import com.muhammedalikocabey.securecheck.domain.log.ILogExporter
-import com.muhammedalikocabey.securecheck.domain.model.AppIntegritySnapshot
+import android.content.pm.PackageManager
+import android.os.Build
+import com.muhammedalikocabey.securecheck.BuildConfig
+import com.muhammedalikocabey.securecheck.data.AndroidScanEnvironment
+import com.muhammedalikocabey.securecheck.data.check.app.AndroidInstallerSource
+import com.muhammedalikocabey.securecheck.data.check.app.AndroidSigningCertificates
+import com.muhammedalikocabey.securecheck.data.check.app.InstallerSource
+import com.muhammedalikocabey.securecheck.data.check.app.SigningCertificates
+import com.muhammedalikocabey.securecheck.data.check.device.AndroidPackageLookup
+import com.muhammedalikocabey.securecheck.data.check.device.PackageLookup
+import com.muhammedalikocabey.securecheck.data.system.AndroidDebuggerProbe
+import com.muhammedalikocabey.securecheck.data.system.BuildFields
+import com.muhammedalikocabey.securecheck.data.system.BuildInfo
+import com.muhammedalikocabey.securecheck.data.system.ClassLookup
+import com.muhammedalikocabey.securecheck.data.system.DebuggerProbe
+import com.muhammedalikocabey.securecheck.data.system.GetpropSystemProps
+import com.muhammedalikocabey.securecheck.data.system.PortProbe
+import com.muhammedalikocabey.securecheck.data.system.ProcFiles
+import com.muhammedalikocabey.securecheck.data.system.RealProcFiles
+import com.muhammedalikocabey.securecheck.data.system.RuntimeClassLookup
+import com.muhammedalikocabey.securecheck.data.system.SocketPortProbe
+import com.muhammedalikocabey.securecheck.data.system.SystemProps
+import com.muhammedalikocabey.securecheck.domain.scan.ScanEnvironment
+import com.muhammedalikocabey.securecheck.domain.scan.TimeSource
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
-/**
- * Uygulama düzeyinde bağımlılıkları sağlayan Dagger module
- *
- * Provides application-level dependencies such as context, preferences, logging and snapshot exporters
- *
- * @since 11.05.2025
- */
 @Module
-class AppModule {
+abstract class AppModule {
+    @Binds abstract fun scanEnvironment(impl: AndroidScanEnvironment): ScanEnvironment
 
-    @Provides
-    fun provideContext(app: Application): Context = app
+    @Binds abstract fun procFiles(impl: RealProcFiles): ProcFiles
 
-    @Provides
-    fun provideSharedPreferences(context: Context): SharedPreferences =
-        context.getSharedPreferences("user_settings", Context.MODE_PRIVATE)
+    @Binds abstract fun systemProps(impl: GetpropSystemProps): SystemProps
 
-    @Provides
-    @Singleton
-    fun provideAppIntegritySnapshot(): AppIntegritySnapshot = AppIntegritySnapshot()
+    @Binds abstract fun portProbe(impl: SocketPortProbe): PortProbe
 
-    @Provides
-    @Singleton
-    fun provideILogExporter(snapshot: AppIntegritySnapshot): ILogExporter =
-        SecurityLogExporter(snapshot)
+    @Binds abstract fun classLookup(impl: RuntimeClassLookup): ClassLookup
+
+    @Binds abstract fun debuggerProbe(impl: AndroidDebuggerProbe): DebuggerProbe
+
+    @Binds abstract fun packageLookup(impl: AndroidPackageLookup): PackageLookup
+
+    @Binds abstract fun signingCertificates(impl: AndroidSigningCertificates): SigningCertificates
+
+    @Binds abstract fun installerSource(impl: AndroidInstallerSource): InstallerSource
+
+    companion object {
+        @Provides
+        fun packageManager(context: Context): PackageManager = context.packageManager
+
+        @Provides
+        fun timeSource(): TimeSource = TimeSource { System.currentTimeMillis() }
+
+        /** Checks do blocking file, process and socket work, so they belong on the IO pool. */
+        @Provides
+        @Singleton
+        fun checkDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+        @Provides
+        @Singleton
+        fun buildInfo(context: Context): BuildInfo = BuildInfo(
+            packageName = context.packageName,
+            isDebug = BuildConfig.DEBUG,
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE.toLong(),
+            builtTargetSdk = BuildConfig.BUILT_TARGET_SDK,
+            expectedCertSha256 = BuildConfig.EXPECTED_CERT_SHA256,
+            integrityProjectNumber = BuildConfig.INTEGRITY_PROJECT_NUMBER,
+        )
+
+        @Provides
+        @Singleton
+        fun buildFields(): BuildFields = BuildFields(
+            fingerprint = Build.FINGERPRINT,
+            model = Build.MODEL,
+            manufacturer = Build.MANUFACTURER,
+            brand = Build.BRAND,
+            device = Build.DEVICE,
+            product = Build.PRODUCT,
+            hardware = Build.HARDWARE,
+            board = Build.BOARD,
+            tags = Build.TAGS.orEmpty(),
+            securityPatch = Build.VERSION.SECURITY_PATCH.orEmpty(),
+        )
+    }
 }

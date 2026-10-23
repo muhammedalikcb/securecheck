@@ -1,0 +1,63 @@
+package com.muhammedalikocabey.securecheck.presentation.scan
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.muhammedalikocabey.securecheck.domain.model.CheckId
+import com.muhammedalikocabey.securecheck.domain.model.CheckResult
+import com.muhammedalikocabey.securecheck.domain.model.ScanReport
+import com.muhammedalikocabey.securecheck.domain.scan.ScanEngine
+import com.muhammedalikocabey.securecheck.domain.scan.ScanEvent
+import com.muhammedalikocabey.securecheck.domain.scan.ScoreCalculator
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+sealed interface ScanUiState {
+    data object Idle : ScanUiState
+
+    data class Scanning(val completed: Int, val total: Int, val results: List<CheckResult>) : ScanUiState
+
+    data class Done(val report: ScanReport) : ScanUiState
+}
+
+class ScanViewModel @Inject constructor(private val engine: ScanEngine, private val scoreCalculator: ScoreCalculator) :
+    ViewModel() {
+    private val _state = MutableStateFlow<ScanUiState>(ScanUiState.Idle)
+    val state: StateFlow<ScanUiState> = _state.asStateFlow()
+
+    private var job: Job? = null
+
+    init {
+        scan()
+    }
+
+    fun scan() {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            engine.scan().collect { event ->
+                when (event) {
+                    is ScanEvent.Started -> _state.value = ScanUiState.Scanning(0, event.total, emptyList())
+                    is ScanEvent.CheckCompleted -> _state.update { current ->
+                        val results = (current as? ScanUiState.Scanning)?.results.orEmpty() + event.result
+                        ScanUiState.Scanning(event.completed, event.total, results)
+                    }
+                    is ScanEvent.Finished -> _state.value = ScanUiState.Done(event.report)
+                }
+            }
+        }
+    }
+
+    /** Runs one check again and recomputes the score without repeating the whole scan. */
+    fun rerun(id: CheckId) {
+        val current = (_state.value as? ScanUiState.Done)?.report ?: return
+        viewModelScope.launch {
+            val fresh = engine.runOne(id) ?: return@launch
+            val results = current.results.map { if (it.id == id) fresh else it }
+            _state.value = ScanUiState.Done(current.copy(results = results, score = scoreCalculator.calculate(results)))
+        }
+    }
+}

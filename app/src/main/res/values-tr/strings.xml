@@ -1,4 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SecureCheck</string>
+
+    <string name="risk_low">Düşük risk</string>
+    <string name="risk_moderate">Orta risk</string>
+    <string name="risk_elevated">Yüksek risk</string>
+    <string name="risk_high">Kritik risk</string>
+
+    <string name="severity_critical">Kritik</string>
+    <string name="severity_high">Yüksek</string>
+    <string name="severity_medium">Orta</string>
+    <string name="severity_low">Düşük</string>
+    <string name="severity_info">Bilgi</string>
+
+    <string name="status_passed">Geçti</string>
+    <string name="status_finding">Bulgu</string>
+    <string name="status_info">Bilgi</string>
+    <string name="status_unavailable">Çalışmadı</string>
+    <string name="status_expected">Beklenen</string>
+
+    <string name="confidence_high">Yüksek güven</string>
+    <string name="confidence_medium">Orta güven</string>
+    <string name="confidence_low">Düşük güven</string>
+
+    <string name="reason_not_configured">Bu derleme için yapılandırılmamış</string>
+    <string name="reason_unsupported">Bu cihazda desteklenmiyor</string>
+    <string name="reason_permission">İzin verilmedi</string>
+    <string name="reason_timeout">Kontrol çok uzun sürdü</string>
+    <string name="reason_error">Kontrol çalıştırılamadı</string>
+    <string name="expected_summary">Debug derlemede beklenen durum</string>
+
+    <string name="category_device">Cihaz bütünlüğü</string>
+    <string name="category_app">Uygulama bütünlüğü</string>
+    <string name="category_runtime">Çalışma zamanı</string>
+    <string name="category_network">Ağ</string>
+    <string name="category_data">Veri</string>
+    <string name="category_platform">Platform</string>
+    <string name="category_clear">Temiz: %1$d/%2$d</string>
+
+    <string name="scan_title">Cihaz taranıyor</string>
+    <string name="scan_progress">Kontrol %1$d / %2$d</string>
+    <string name="scan_hint">Tüm kontroller bu cihazda çalışır. Telefondan hiçbir veri çıkmaz.</string>
+
+    <string name="score_out_of">/ 100</string>
+    <string name="score_description">Güvenlik skoru 100 üzerinden %1$d, %2$s</string>
+    <plurals name="findings_count">
+        <item quantity="one">%d bulgu</item>
+        <item quantity="other">%d bulgu</item>
+    </plurals>
+    <string name="summary_clean">Bulgu yok. Çalışabilen her kontrol temiz çıktı.</string>
+    <string name="coverage_label">Kapsam: %%%1$d</string>
+    <string name="device_line">%1$s %2$s · Android %3$s</string>
+    <string name="debug_banner">Debug derleme: bazı kontroller bulgu yerine beklenen sonuç bildirir.</string>
+
+    <string name="section_fix_first">Önce bunları düzeltin</string>
+    <string name="section_categories">Kategoriler</string>
+    <string name="action_scan_again">Yeniden tara</string>
+    <string name="action_back">Geri</string>
+    <string name="action_show_details">Ayrıntıları göster</string>
+    <string name="action_rerun">Bu kontrolü tekrar çalıştır</string>
+    <string name="action_open_standard">OWASP MASVS’te aç</string>
+
+    <string name="sheet_found">Ne bulundu</string>
+    <string name="sheet_why">Neden önemli</string>
+    <string name="sheet_fix">Nasıl düzeltilir</string>
+    <string name="sheet_standard">Standart</string>
+    <string name="sheet_no_evidence">Başka ayrıntı kaydedilmedi.</string>
 </resources>

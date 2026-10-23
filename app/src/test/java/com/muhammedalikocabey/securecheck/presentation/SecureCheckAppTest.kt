@@ -1,0 +1,176 @@
+package com.muhammedalikocabey.securecheck.presentation
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.view.View
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.muhammedalikocabey.securecheck.R
+import com.muhammedalikocabey.securecheck.domain.model.AppSummary
+import com.muhammedalikocabey.securecheck.domain.model.CheckId
+import com.muhammedalikocabey.securecheck.domain.model.CheckResult
+import com.muhammedalikocabey.securecheck.domain.model.Confidence
+import com.muhammedalikocabey.securecheck.domain.model.DeviceSummary
+import com.muhammedalikocabey.securecheck.domain.model.ScanReport
+import com.muhammedalikocabey.securecheck.domain.model.UnavailableReason
+import com.muhammedalikocabey.securecheck.domain.scan.ScoreCalculator
+import com.muhammedalikocabey.securecheck.presentation.content.labelRes
+import com.muhammedalikocabey.securecheck.presentation.scan.ScanUiState
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.File
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "w411dp-h891dp-xxhdpi")
+class SecureCheckAppTest {
+    @get:Rule
+    val rule = createComposeRule()
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
+
+    private fun sampleReport(debug: Boolean = false): ScanReport {
+        val results = CheckId.entries.map { id ->
+            when (id) {
+                CheckId.ROOT -> CheckResult.finding(id, listOf("/system/xbin/su"))
+                CheckId.SCREEN_LOCK -> CheckResult.finding(id, listOf("keyguard is not secure"), Confidence.MEDIUM)
+                CheckId.USER_CA -> CheckResult.finding(id, listOf("2 user-installed CA certificates"))
+                CheckId.PLAY_INTEGRITY -> CheckResult.unavailable(id, UnavailableReason.NOT_CONFIGURED)
+                CheckId.VPN -> CheckResult.info(id, listOf("transport=VPN"))
+                CheckId.DEBUGGABLE -> if (debug) CheckResult.expected(id) else CheckResult.passed(id)
+                else -> CheckResult.passed(id)
+            }
+        }
+        return ScanReport(
+            id = "sample",
+            startedAtMs = 0,
+            durationMs = 1_200,
+            device = DeviceSummary("Google", "Pixel 8", "15", 35, "2025-05-05"),
+            app = AppSummary("2.0.0", 1, debug),
+            results = results,
+            score = ScoreCalculator().calculate(results),
+        )
+    }
+
+    private fun show(state: ScanUiState, onScan: () -> Unit = {}, onRerun: (CheckId) -> Unit = {}) {
+        rule.setContent { SecureCheckApp(state, onScan, onRerun) }
+    }
+
+    private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
+
+    /**
+     * Draws every window of the test (the sheet is its own window) into one PNG. Window capture through PixelCopy
+     * does not run under Robolectric, so the views draw themselves instead.
+     */
+    private fun screenshot(name: String) {
+        val views = rule.onAllNodes(isRoot()).fetchSemanticsNodes().mapNotNull { it.root as? View }
+        val base = views.first()
+        val bitmap = Bitmap.createBitmap(base.width, base.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        for (view in views) view.draw(canvas)
+        val dir = File("build/screenshots").apply { mkdirs() }
+        File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test
+    fun `dashboard announces the score and lists what to fix first`() {
+        val report = sampleReport()
+        show(ScanUiState.Done(report))
+        val description = string(R.string.score_description, report.score.value, string(report.score.risk.labelRes))
+        rule.onNodeWithContentDescription(description).assertExists()
+        rule.onNodeWithText(string(R.string.section_fix_first)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.check_root_title)).assertIsDisplayed()
+        screenshot("dashboard-light-en")
+    }
+
+    @Test
+    fun `selecting a finding opens the sheet with how to fix it`() {
+        show(ScanUiState.Done(sampleReport()))
+        rule.onAllNodesWithText(string(R.string.check_root_title))[0].performClick()
+        rule.onNodeWithText(string(R.string.sheet_fix)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.action_rerun)).assertIsDisplayed()
+        screenshot("sheet-finding-en")
+    }
+
+    @Test
+    fun `rerun passes the check id to the caller`() {
+        var rerun: CheckId? = null
+        show(ScanUiState.Done(sampleReport()), onRerun = { rerun = it })
+        rule.onAllNodesWithText(string(R.string.check_root_title))[0].performClick()
+        rule.onNodeWithText(string(R.string.action_rerun)).performClick()
+        assertEquals(CheckId.ROOT, rerun)
+    }
+
+    @Test
+    fun `category card opens its list and back returns to the dashboard`() {
+        show(ScanUiState.Done(sampleReport()))
+        rule.onNodeWithText(string(R.string.category_network)).performClick()
+        rule.onNodeWithText(string(R.string.check_user_ca_title)).assertIsDisplayed()
+        screenshot("category-network-en")
+        rule.onNodeWithContentDescription(string(R.string.action_back)).performClick()
+        rule.onNodeWithText(string(R.string.section_categories)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `scan again asks the caller to rescan`() {
+        var scans = 0
+        show(ScanUiState.Done(sampleReport()), onScan = { scans++ })
+        rule.onNode(hasScrollAction()).performScrollToNode(hasText(string(R.string.action_scan_again)))
+        rule.onNodeWithText(string(R.string.action_scan_again)).performClick()
+        assertEquals(1, scans)
+    }
+
+    @Test
+    fun `scanning shows determinate progress`() {
+        val results = listOf(CheckResult.passed(CheckId.SCREEN_LOCK), CheckResult.passed(CheckId.ROOT))
+        show(ScanUiState.Scanning(completed = 2, total = CheckId.entries.size, results = results))
+        rule.onNodeWithText(string(R.string.scan_progress, 2, CheckId.entries.size)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.scan_hint)).assertIsDisplayed()
+        screenshot("scanning-en")
+    }
+
+    @Test
+    fun `debug builds explain why some results are expected`() {
+        show(ScanUiState.Done(sampleReport(debug = true)))
+        rule.onNodeWithText(string(R.string.debug_banner)).assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "tr-rTR-w411dp-h891dp-night-xxhdpi")
+    fun `turkish dark dashboard`() {
+        show(ScanUiState.Done(sampleReport()))
+        rule.onNodeWithText(string(R.string.section_fix_first)).assertIsDisplayed()
+        screenshot("dashboard-dark-tr")
+    }
+
+    @Test
+    @Config(qualifiers = "w411dp-h891dp-night-xxhdpi")
+    fun `dark sheet`() {
+        show(ScanUiState.Done(sampleReport()))
+        rule.onAllNodesWithText(string(R.string.check_screen_lock_title))[0].performClick()
+        screenshot("sheet-dark-en")
+    }
+
+    @Test
+    @Config(qualifiers = "w411dp-h891dp-xxhdpi", fontScale = 1.6f)
+    fun `large font keeps rows readable`() {
+        show(ScanUiState.Done(sampleReport()))
+        rule.onNodeWithText(string(R.string.section_fix_first)).assertIsDisplayed()
+        screenshot("dashboard-large-font")
+    }
+}

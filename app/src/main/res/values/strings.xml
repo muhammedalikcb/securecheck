@@ -1,4 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SecureCheck</string>
+
+    <string name="risk_low">Low risk</string>
+    <string name="risk_moderate">Moderate risk</string>
+    <string name="risk_elevated">High risk</string>
+    <string name="risk_high">Critical risk</string>
+
+    <string name="severity_critical">Critical</string>
+    <string name="severity_high">High</string>
+    <string name="severity_medium">Medium</string>
+    <string name="severity_low">Low</string>
+    <string name="severity_info">Info</string>
+
+    <string name="status_passed">Passed</string>
+    <string name="status_finding">Finding</string>
+    <string name="status_info">Info</string>
+    <string name="status_unavailable">Not run</string>
+    <string name="status_expected">Expected</string>
+
+    <string name="confidence_high">High confidence</string>
+    <string name="confidence_medium">Medium confidence</string>
+    <string name="confidence_low">Low confidence</string>
+
+    <string name="reason_not_configured">Not configured for this build</string>
+    <string name="reason_unsupported">Not supported on this device</string>
+    <string name="reason_permission">Permission was not granted</string>
+    <string name="reason_timeout">The check took too long</string>
+    <string name="reason_error">The check failed to run</string>
+    <string name="expected_summary">Expected in a debug build</string>
+
+    <string name="category_device">Device integrity</string>
+    <string name="category_app">App integrity</string>
+    <string name="category_runtime">Runtime</string>
+    <string name="category_network">Network</string>
+    <string name="category_data">Data</string>
+    <string name="category_platform">Platform</string>
+    <string name="category_clear">Clear: %1$d/%2$d</string>
+
+    <string name="scan_title">Scanning this device</string>
+    <string name="scan_progress">Check %1$d of %2$d</string>
+    <string name="scan_hint">Every check runs on this device. Nothing leaves the phone.</string>
+
+    <string name="score_out_of">out of 100</string>
+    <string name="score_description">Security score %1$d/100, %2$s</string>
+    <plurals name="findings_count">
+        <item quantity="one">%d finding</item>
+        <item quantity="other">%d findings</item>
+    </plurals>
+    <string name="summary_clean">No findings. Every check that could run came back clear.</string>
+    <string name="coverage_label">%1$d%% of checks could run</string>
+    <string name="device_line">%1$s %2$s · Android %3$s</string>
+    <string name="debug_banner">Debug build: some checks report expected results instead of findings.</string>
+
+    <string name="section_fix_first">Fix these first</string>
+    <string name="section_categories">Categories</string>
+    <string name="action_scan_again">Scan again</string>
+    <string name="action_back">Back</string>
+    <string name="action_show_details">Show details</string>
+    <string name="action_rerun">Run this check again</string>
+    <string name="action_open_standard">Open in OWASP MASVS</string>
+
+    <string name="sheet_found">What was found</string>
+    <string name="sheet_why">Why it matters</string>
+    <string name="sheet_fix">How to fix</string>
+    <string name="sheet_standard">Standard</string>
+    <string name="sheet_no_evidence">No further detail was recorded.</string>
 </resources>

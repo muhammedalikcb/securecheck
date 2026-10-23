@@ -2,12 +2,13 @@ package com.muhammedalikocabey.securecheck.domain.model
 
 /**
  * Every check the app can run. [key] is stable and written to exported reports, so never rename one.
- * [masvs] is the OWASP MASVS v2 control the check informs.
+ * [masvs] is the OWASP MASVS v2 control the check informs. Where the MASVS/MASWE weakness catalogue has no entry for a
+ * device setting (developer options, USB debugging, install source, patch level) it is the nearest control.
  */
 enum class CheckId(val key: String, val category: Category, val severity: Severity, val masvs: String?) {
     ROOT("root", Category.DEVICE, Severity.HIGH, "MASVS-RESILIENCE-1"),
     KEY_ATTESTATION("key_attestation", Category.DEVICE, Severity.HIGH, "MASVS-RESILIENCE-1"),
-    SCREEN_LOCK("screen_lock", Category.DEVICE, Severity.HIGH, "MASVS-AUTH-2"),
+    SCREEN_LOCK("screen_lock", Category.DEVICE, Severity.HIGH, "MASVS-CRYPTO-2"),
     SECURITY_PATCH("security_patch", Category.DEVICE, Severity.MEDIUM, "MASVS-CODE-1"),
     DEVELOPER_OPTIONS("developer_options", Category.DEVICE, Severity.LOW, "MASVS-RESILIENCE-1"),
     USB_DEBUGGING("usb_debugging", Category.DEVICE, Severity.MEDIUM, "MASVS-RESILIENCE-1"),

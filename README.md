@@ -50,14 +50,28 @@ with a test for the finding and the clean case, mapped to an OWASP MASVS control
 
 ## Checks
 
-| Category | Check | MASVS control |
+| Category | Check | MASVS v2 control |
 | --- | --- | --- |
-| Device integrity | Root access, Hardware key attestation, Screen lock, Security patch level, Developer options, USB debugging, Emulator, Biometric lock, Play Integrity | RESILIENCE-1, AUTH-2, CODE-1 |
-| App integrity | App signature, Install source, Debuggable build, Code shrinking, Target SDK | RESILIENCE-2/3/4, CODE-1 |
-| Runtime | Debugger, Frida instrumentation, Xposed and LSPosed, Magisk, Injected code | RESILIENCE-1/2/4 |
+| Device | Root access, Hardware key attestation, Play Integrity, Developer options*, USB debugging*, Emulator | RESILIENCE-1 |
+| Device | Screen lock | CRYPTO-2 |
+| Device | Biometric lock | AUTH-2 |
+| Device | Security patch level* | CODE-1 |
+| App | App signature, Install source* | RESILIENCE-2 |
+| App | Debuggable build | RESILIENCE-4 |
+| App | Code shrinking | RESILIENCE-3 |
+| App | Target SDK | CODE-1 |
+| Runtime | Magisk | RESILIENCE-1 |
+| Runtime | Injected code | RESILIENCE-2 |
+| Runtime | Debugger, Frida instrumentation, Xposed and LSPosed | RESILIENCE-4 |
 | Network | VPN, HTTP proxy, User certificates, Cleartext traffic | NETWORK-1 |
-| Data | Hardware-backed keystore, App backup | CRYPTO-2, STORAGE-2 |
-| Platform | Exported components, Accessibility services | PLATFORM-1/3 |
+| Data | Hardware-backed keystore | CRYPTO-2 |
+| Data | App backup | STORAGE-2 |
+| Platform | Exported components | PLATFORM-1 |
+| Platform | Accessibility services | PLATFORM-3 |
+
+The mapping follows the OWASP MASTG and MASWE weakness catalogue (for example MASWE-0017 for screen lock, MASWE-0054
+for device attestation, MASWE-0065 for instrumentation tools). Rows marked * have no weakness entry of their own, so
+the control shown is the nearest one. A check informs a control; it does not prove the app meets it.
 
 A check has one of five outcomes: passed, finding, informational, expected (for example "debuggable" on a debug
 build), or not run (with the reason). A check that could not run is never reported as passed.

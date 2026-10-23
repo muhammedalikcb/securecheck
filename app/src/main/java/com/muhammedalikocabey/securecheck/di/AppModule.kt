@@ -11,6 +11,9 @@ import com.muhammedalikocabey.securecheck.data.check.app.InstallerSource
 import com.muhammedalikocabey.securecheck.data.check.app.SigningCertificates
 import com.muhammedalikocabey.securecheck.data.check.device.AndroidPackageLookup
 import com.muhammedalikocabey.securecheck.data.check.device.PackageLookup
+import com.muhammedalikocabey.securecheck.data.history.JsonFileReportStore
+import com.muhammedalikocabey.securecheck.data.notify.AndroidChangeNotifier
+import com.muhammedalikocabey.securecheck.data.settings.PreferencesSettingsStore
 import com.muhammedalikocabey.securecheck.data.system.AndroidDebuggerProbe
 import com.muhammedalikocabey.securecheck.data.system.BuildFields
 import com.muhammedalikocabey.securecheck.data.system.BuildInfo
@@ -23,13 +26,19 @@ import com.muhammedalikocabey.securecheck.data.system.RealProcFiles
 import com.muhammedalikocabey.securecheck.data.system.RuntimeClassLookup
 import com.muhammedalikocabey.securecheck.data.system.SocketPortProbe
 import com.muhammedalikocabey.securecheck.data.system.SystemProps
+import com.muhammedalikocabey.securecheck.data.work.WorkManagerScanScheduler
+import com.muhammedalikocabey.securecheck.domain.history.ChangeNotifier
+import com.muhammedalikocabey.securecheck.domain.history.ReportStore
 import com.muhammedalikocabey.securecheck.domain.scan.ScanEnvironment
 import com.muhammedalikocabey.securecheck.domain.scan.TimeSource
+import com.muhammedalikocabey.securecheck.domain.settings.ScanScheduler
+import com.muhammedalikocabey.securecheck.domain.settings.SettingsStore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import java.io.File
 import javax.inject.Singleton
 
 @Module
@@ -52,6 +61,12 @@ abstract class AppModule {
 
     @Binds abstract fun installerSource(impl: AndroidInstallerSource): InstallerSource
 
+    @Binds abstract fun settingsStore(impl: PreferencesSettingsStore): SettingsStore
+
+    @Binds abstract fun scanScheduler(impl: WorkManagerScanScheduler): ScanScheduler
+
+    @Binds abstract fun changeNotifier(impl: AndroidChangeNotifier): ChangeNotifier
+
     companion object {
         @Provides
         fun packageManager(context: Context): PackageManager = context.packageManager
@@ -63,6 +78,10 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun checkDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+        @Provides
+        @Singleton
+        fun reportStore(context: Context): ReportStore = JsonFileReportStore(File(context.filesDir, "reports"))
 
         @Provides
         @Singleton

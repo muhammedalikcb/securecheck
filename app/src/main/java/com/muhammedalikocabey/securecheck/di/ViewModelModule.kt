@@ -2,7 +2,9 @@ package com.muhammedalikocabey.securecheck.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.muhammedalikocabey.securecheck.presentation.history.HistoryViewModel
 import com.muhammedalikocabey.securecheck.presentation.scan.ScanViewModel
+import com.muhammedalikocabey.securecheck.presentation.settings.SettingsViewModel
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module
@@ -35,4 +37,12 @@ abstract class ViewModelModule {
     @Binds @IntoMap
     @ViewModelKey(ScanViewModel::class)
     abstract fun scanViewModel(impl: ScanViewModel): ViewModel
+
+    @Binds @IntoMap
+    @ViewModelKey(HistoryViewModel::class)
+    abstract fun historyViewModel(impl: HistoryViewModel): ViewModel
+
+    @Binds @IntoMap
+    @ViewModelKey(SettingsViewModel::class)
+    abstract fun settingsViewModel(impl: SettingsViewModel): ViewModel
 }

@@ -21,6 +21,19 @@ object SecureIcons {
     val Chevron: ImageVector by lazy { icon("Chevron", "M9.5 6l6 6-6 6") }
     val Refresh: ImageVector by lazy { icon("Refresh", "M20 12a8 8 0 1 1-2.5-5.8", "M20 4v5h-5") }
     val Back: ImageVector by lazy { icon("Back", "M19 12H5", "M11 5l-7 7 7 7") }
+    val History: ImageVector by lazy { icon("History", CIRCLE, "M12 7.5V12l3 2") }
+    val Settings: ImageVector by lazy {
+        icon(
+            "Settings",
+            "M4 7h8",
+            "M18 7h2",
+            "M12 7a2 2 0 1 0 4 0 2 2 0 1 0-4 0z",
+            "M4 17h2",
+            "M12 17h8",
+            "M6 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0z",
+        )
+    }
+    val Share: ImageVector by lazy { icon("Share", "M12 15V4", "M8 8l4-4 4 4", "M5 12v7h14v-7") }
     val External: ImageVector by lazy {
         icon("External", "M14 4h6v6", "M20 4l-9 9", "M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5")
     }

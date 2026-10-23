@@ -12,21 +12,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.muhammedalikocabey.securecheck.R
+import com.muhammedalikocabey.securecheck.domain.export.ExportFormat
+import com.muhammedalikocabey.securecheck.domain.history.ReportDiff
 import com.muhammedalikocabey.securecheck.domain.model.Category
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
 import com.muhammedalikocabey.securecheck.domain.model.ScanReport
@@ -52,6 +64,10 @@ fun DashboardScreen(
     onSelectCategory: (Category) -> Unit,
     onScanAgain: () -> Unit,
     modifier: Modifier = Modifier,
+    diff: ReportDiff? = null,
+    onOpenHistory: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+    onShare: (ExportFormat) -> Unit = {},
 ) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
@@ -59,7 +75,8 @@ fun DashboardScreen(
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item(key = "summary") { Summary(report) }
+            item(key = "toolbar") { Toolbar(onOpenHistory, onOpenSettings, onShare) }
+            item(key = "summary") { Summary(report, diff) }
             if (report.app.debugBuild) item(key = "debug") { DebugBanner() }
 
             val top = report.prioritizedFindings().take(TOP_FINDINGS)
@@ -96,7 +113,7 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun Summary(report: ScanReport) {
+private fun Summary(report: ScanReport, diff: ReportDiff?) {
     val score = report.score
     val device = report.device
     val tone = score.risk.tone()
@@ -130,6 +147,7 @@ private fun Summary(report: ScanReport) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        if (diff != null) SinceLastScan(diff)
     }
 }
 
@@ -138,7 +156,7 @@ private fun DebugBanner() {
     val tone = SecureTheme.colors.info
     OutlinedCard(Modifier.fillMaxWidth()) {
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            androidx.compose.material3.Icon(
+            Icon(
                 SecureIcons.Info,
                 contentDescription = null,
                 tint = tone.main,
@@ -160,4 +178,65 @@ internal fun SectionTitle(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onSurface,
     )
+}
+
+@Composable
+private fun SinceLastScan(diff: ReportDiff) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            stringResource(R.string.dashboard_since_last),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            if (diff.hasChanges) {
+                stringResource(R.string.history_changes, diff.newFindings.size, diff.resolved.size)
+            } else {
+                stringResource(R.string.history_no_changes)
+            },
+            style = MaterialTheme.typography.bodyMedium.merge(NumericStyle),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+@Composable
+private fun Toolbar(onOpenHistory: () -> Unit, onOpenSettings: () -> Unit, onShare: (ExportFormat) -> Unit) {
+    var menuOpen by remember { mutableStateOf(false) }
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.app_name),
+            modifier = Modifier.weight(1f).semantics { heading() },
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        ToolbarButton(SecureIcons.History, R.string.action_history, onOpenHistory)
+        Box {
+            ToolbarButton(SecureIcons.Share, R.string.action_share) { menuOpen = true }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.share_json)) },
+                    onClick = {
+                        menuOpen = false
+                        onShare(ExportFormat.JSON)
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.share_html)) },
+                    onClick = {
+                        menuOpen = false
+                        onShare(ExportFormat.HTML)
+                    },
+                )
+            }
+        }
+        ToolbarButton(SecureIcons.Settings, R.string.action_settings, onOpenSettings)
+    }
+}
+
+@Composable
+private fun ToolbarButton(icon: ImageVector, descriptionRes: Int, onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(48.dp)) {
+        Icon(icon, contentDescription = stringResource(descriptionRes))
+    }
 }

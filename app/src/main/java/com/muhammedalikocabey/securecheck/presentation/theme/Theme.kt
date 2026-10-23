@@ -11,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
+import com.muhammedalikocabey.securecheck.domain.settings.ThemeMode
 
 private val LocalSecureColors = staticCompositionLocalOf { LightSecureColors }
 
@@ -66,4 +67,11 @@ fun SecureCheckTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
             content = content,
         )
     }
+}
+
+/** Maps the user's choice to dark or light, falling back to the system setting. */
+fun ThemeMode.isDark(systemDark: Boolean): Boolean = when (this) {
+    ThemeMode.SYSTEM -> systemDark
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
 }

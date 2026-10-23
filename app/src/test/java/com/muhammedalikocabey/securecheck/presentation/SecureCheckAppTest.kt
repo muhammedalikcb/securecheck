@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
@@ -17,6 +18,8 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.muhammedalikocabey.securecheck.R
+import com.muhammedalikocabey.securecheck.domain.export.ExportFormat
+import com.muhammedalikocabey.securecheck.domain.history.ReportDiff
 import com.muhammedalikocabey.securecheck.domain.model.AppSummary
 import com.muhammedalikocabey.securecheck.domain.model.CheckId
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
@@ -25,6 +28,8 @@ import com.muhammedalikocabey.securecheck.domain.model.DeviceSummary
 import com.muhammedalikocabey.securecheck.domain.model.ScanReport
 import com.muhammedalikocabey.securecheck.domain.model.UnavailableReason
 import com.muhammedalikocabey.securecheck.domain.scan.ScoreCalculator
+import com.muhammedalikocabey.securecheck.domain.settings.Settings
+import com.muhammedalikocabey.securecheck.domain.settings.ThemeMode
 import com.muhammedalikocabey.securecheck.presentation.content.labelRes
 import com.muhammedalikocabey.securecheck.presentation.scan.ScanUiState
 import org.junit.Assert.assertEquals
@@ -68,7 +73,18 @@ class SecureCheckAppTest {
     }
 
     private fun show(state: ScanUiState, onScan: () -> Unit = {}, onRerun: (CheckId) -> Unit = {}) {
-        rule.setContent { SecureCheckApp(state, onScan, onRerun) }
+        rule.setContent {
+            SecureCheckApp(state, actions = AppActions(onScan = onScan, onRerun = onRerun))
+        }
+    }
+
+    private fun showWith(
+        state: ScanUiState,
+        history: List<ScanReport> = emptyList(),
+        settings: Settings = Settings(),
+        actions: AppActions = AppActions(),
+    ) {
+        rule.setContent { SecureCheckApp(state, history, settings, actions) }
     }
 
     private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
@@ -119,6 +135,7 @@ class SecureCheckAppTest {
     @Test
     fun `category card opens its list and back returns to the dashboard`() {
         show(ScanUiState.Done(sampleReport()))
+        rule.onNode(hasScrollAction()).performScrollToNode(hasText(string(R.string.category_network)))
         rule.onNodeWithText(string(R.string.category_network)).performClick()
         rule.onNodeWithText(string(R.string.check_user_ca_title)).assertIsDisplayed()
         screenshot("category-network-en")
@@ -172,5 +189,92 @@ class SecureCheckAppTest {
         show(ScanUiState.Done(sampleReport()))
         rule.onNodeWithText(string(R.string.section_fix_first)).assertIsDisplayed()
         screenshot("dashboard-large-font")
+    }
+
+    @Test
+    fun `toolbar opens history and back returns to the dashboard`() {
+        val newer = sampleReport()
+        val older = sampleReport().copy(id = "older", startedAtMs = -86_400_000)
+        var opened = 0
+        showWith(ScanUiState.Done(newer), listOf(newer, older), actions = AppActions(onOpenHistory = { opened++ }))
+        rule.onNodeWithContentDescription(string(R.string.action_history)).performClick()
+
+        rule.onNodeWithText(string(R.string.history_title)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.history_first_scan)).assertExists()
+        assertEquals(1, opened)
+        screenshot("history-en")
+
+        rule.onNodeWithContentDescription(string(R.string.action_back)).performClick()
+        rule.onNodeWithContentDescription(string(R.string.action_history)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `empty history explains itself`() {
+        showWith(ScanUiState.Done(sampleReport()))
+        rule.onNodeWithContentDescription(string(R.string.action_history)).performClick()
+
+        rule.onNodeWithText(string(R.string.history_empty_title)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `share menu offers both formats and reports the choice`() {
+        val chosen = mutableListOf<ExportFormat>()
+        showWith(ScanUiState.Done(sampleReport()), actions = AppActions(onShare = { chosen += it }))
+        rule.onNodeWithContentDescription(string(R.string.action_share)).performClick()
+        rule.onNodeWithText(string(R.string.share_json)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.share_html)).performClick()
+
+        assertEquals(listOf(ExportFormat.HTML), chosen)
+    }
+
+    @Test
+    fun `dashboard shows the change since the last scan`() {
+        val diff = ReportDiff(scoreDelta = -10, newFindings = listOf(CheckId.ROOT), resolved = emptyList())
+        showWith(ScanUiState.Done(sampleReport(), diff))
+
+        rule.onNodeWithText(string(R.string.dashboard_since_last)).assertExists()
+        rule.onNodeWithText(string(R.string.history_changes, 1, 0)).assertExists()
+    }
+
+    @Test
+    fun `settings screen applies choices and confirms before deleting history`() {
+        val themes = mutableListOf<ThemeMode>()
+        var cleared = 0
+        showWith(
+            ScanUiState.Done(sampleReport()),
+            actions = AppActions(onTheme = { themes += it }, onClearHistory = { cleared++ }),
+        )
+        rule.onNodeWithContentDescription(string(R.string.action_settings)).performClick()
+        rule.onNodeWithText(string(R.string.settings_title)).assertIsDisplayed()
+        screenshot("settings-en")
+
+        rule.onNodeWithText(string(R.string.theme_dark)).performClick()
+        assertEquals(listOf(ThemeMode.DARK), themes)
+
+        rule.onNodeWithText(string(R.string.settings_clear)).performClick()
+        rule.onNodeWithText(string(R.string.settings_clear_title)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.settings_cancel)).performClick()
+        assertEquals(0, cleared)
+
+        rule.onNodeWithText(string(R.string.settings_clear)).performClick()
+        rule.onNodeWithText(string(R.string.settings_delete)).performClick()
+        assertEquals(1, cleared)
+    }
+
+    @Test
+    fun `daily scan is unavailable without history`() {
+        showWith(ScanUiState.Done(sampleReport()), settings = Settings(saveHistory = false))
+        rule.onNodeWithContentDescription(string(R.string.action_settings)).performClick()
+
+        rule.onNodeWithText(string(R.string.settings_daily_needs_history)).assertExists()
+        rule.onNodeWithText(string(R.string.settings_daily)).assertIsNotEnabled()
+    }
+
+    @Test
+    @Config(qualifiers = "tr-rTR-w411dp-h891dp-night-xxhdpi")
+    fun `turkish dark settings`() {
+        showWith(ScanUiState.Done(sampleReport()), settings = Settings(theme = ThemeMode.DARK))
+        rule.onNodeWithContentDescription(string(R.string.action_settings)).performClick()
+        screenshot("settings-dark-tr")
     }
 }

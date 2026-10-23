@@ -2,6 +2,8 @@ package com.muhammedalikocabey.securecheck.presentation.scan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muhammedalikocabey.securecheck.domain.history.ReportDiff
+import com.muhammedalikocabey.securecheck.domain.history.ScanRecorder
 import com.muhammedalikocabey.securecheck.domain.model.CheckId
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
 import com.muhammedalikocabey.securecheck.domain.model.ScanReport
@@ -21,11 +23,15 @@ sealed interface ScanUiState {
 
     data class Scanning(val completed: Int, val total: Int, val results: List<CheckResult>) : ScanUiState
 
-    data class Done(val report: ScanReport) : ScanUiState
+    /** [diff] is how this scan differs from the previous saved one, or null when there is nothing to compare. */
+    data class Done(val report: ScanReport, val diff: ReportDiff? = null) : ScanUiState
 }
 
-class ScanViewModel @Inject constructor(private val engine: ScanEngine, private val scoreCalculator: ScoreCalculator) :
-    ViewModel() {
+class ScanViewModel @Inject constructor(
+    private val engine: ScanEngine,
+    private val scoreCalculator: ScoreCalculator,
+    private val recorder: ScanRecorder,
+) : ViewModel() {
     private val _state = MutableStateFlow<ScanUiState>(ScanUiState.Idle)
     val state: StateFlow<ScanUiState> = _state.asStateFlow()
 
@@ -45,7 +51,9 @@ class ScanViewModel @Inject constructor(private val engine: ScanEngine, private 
                         val results = (current as? ScanUiState.Scanning)?.results.orEmpty() + event.result
                         ScanUiState.Scanning(event.completed, event.total, results)
                     }
-                    is ScanEvent.Finished -> _state.value = ScanUiState.Done(event.report)
+                    is ScanEvent.Finished ->
+                        _state.value =
+                            ScanUiState.Done(event.report, recorder.record(event.report))
                 }
             }
         }
@@ -57,7 +65,8 @@ class ScanViewModel @Inject constructor(private val engine: ScanEngine, private 
         viewModelScope.launch {
             val fresh = engine.runOne(id) ?: return@launch
             val results = current.results.map { if (it.id == id) fresh else it }
-            _state.value = ScanUiState.Done(current.copy(results = results, score = scoreCalculator.calculate(results)))
+            val updated = current.copy(results = results, score = scoreCalculator.calculate(results))
+            _state.value = ScanUiState.Done(updated, (_state.value as? ScanUiState.Done)?.diff)
         }
     }
 }

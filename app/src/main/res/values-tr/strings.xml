@@ -66,4 +66,50 @@
     <string name="sheet_fix">Nasıl düzeltilir</string>
     <string name="sheet_standard">Standart</string>
     <string name="sheet_no_evidence">Başka ayrıntı kaydedilmedi.</string>
+
+    <string name="notification_channel">Güvenlik değişiklikleri</string>
+    <plurals name="notification_title">
+        <item quantity="one">Bu cihazda %d yeni bulgu</item>
+        <item quantity="other">Bu cihazda %d yeni bulgu</item>
+    </plurals>
+    <string name="notification_body">Güvenlik puanı: %1$d</string>
+
+    <string name="action_history">Tarama geçmişi</string>
+    <string name="action_settings">Ayarlar</string>
+    <string name="action_share">Raporu paylaş</string>
+    <string name="share_json">JSON olarak paylaş</string>
+    <string name="share_html">HTML olarak paylaş</string>
+    <string name="share_chooser">Raporu paylaş</string>
+    <string name="share_failed">Rapor hazırlanamadı.</string>
+
+    <string name="history_title">Tarama geçmişi</string>
+    <string name="history_empty_title">Kayıtlı tarama yok</string>
+    <string name="history_empty_body">Biten taramalar burada görünür. Kaydetmeyi ayarlardan kapatabilirsiniz.</string>
+    <string name="history_first_scan">İlk kayıtlı tarama</string>
+    <string name="history_no_changes">Önceki taramadan beri değişiklik yok</string>
+    <string name="history_score">Puan: %1$d</string>
+    <string name="history_changes">Yeni: %1$d · Giderilen: %2$d</string>
+    <string name="dashboard_since_last">Son taramanızdan beri</string>
+
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_appearance">Görünüm</string>
+    <string name="theme_system">Sistemi izle</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="settings_background">Arka plan</string>
+    <string name="settings_daily">Günlük tarama</string>
+    <string name="settings_daily_desc">Pil azalmamışken günde yaklaşık bir kez çalışır. Yalnızca yeni bir bulgu çıkarsa bildirim alırsınız.</string>
+    <string name="settings_daily_needs_history">Günlük tarama için geçmişi açın.</string>
+    <string name="settings_history">Tarama geçmişini kaydet</string>
+    <string name="settings_history_desc">En yeni 30 raporu yalnızca bu cihazda tutar.</string>
+    <string name="settings_clear">Geçmişi temizle</string>
+    <string name="settings_clear_title">Kayıtlı tüm raporlar silinsin mi?</string>
+    <string name="settings_clear_body">Kayıtlı her tarama bu cihazdan silinir. Bu işlem geri alınamaz.</string>
+    <string name="settings_delete">Sil</string>
+    <string name="settings_cancel">Vazgeç</string>
+    <string name="settings_language">Uygulama dili</string>
+    <string name="settings_language_desc">Bu uygulama için sistem dil ayarlarını açar.</string>
+    <string name="settings_about">Hakkında</string>
+    <string name="settings_version">Sürüm %1$s</string>
+    <string name="settings_privacy">Taramalar bu cihazda çalışır. Hesap ve sunucu yoktur. Rapor, yalnızca siz paylaşırsanız cihazdan çıkar.</string>
 </resources>

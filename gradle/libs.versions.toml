@@ -7,6 +7,7 @@ coreKtx = "1.16.0"
 splashscreen = "1.0.1"
 lifecycle = "2.9.0"
 activityCompose = "1.10.1"
+fragment = "1.8.9"
 composeBom = "2025.05.00"
 dagger = "2.56.2"
 playIntegrity = "1.4.0"
@@ -26,6 +27,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-ui = { module = "androidx.compose.ui:ui" }

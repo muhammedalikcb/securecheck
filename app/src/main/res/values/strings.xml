@@ -66,4 +66,50 @@
     <string name="sheet_fix">How to fix</string>
     <string name="sheet_standard">Standard</string>
     <string name="sheet_no_evidence">No further detail was recorded.</string>
+
+    <string name="notification_channel">Security changes</string>
+    <plurals name="notification_title">
+        <item quantity="one">%d new finding on this device</item>
+        <item quantity="other">%d new findings on this device</item>
+    </plurals>
+    <string name="notification_body">Security score: %1$d</string>
+
+    <string name="action_history">Scan history</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_share">Share report</string>
+    <string name="share_json">Share as JSON</string>
+    <string name="share_html">Share as HTML</string>
+    <string name="share_chooser">Share report</string>
+    <string name="share_failed">The report could not be prepared.</string>
+
+    <string name="history_title">Scan history</string>
+    <string name="history_empty_title">No saved scans yet</string>
+    <string name="history_empty_body">Finished scans appear here. You can turn saving off in settings.</string>
+    <string name="history_first_scan">First saved scan</string>
+    <string name="history_no_changes">No change since the previous scan</string>
+    <string name="history_score">Score: %1$d</string>
+    <string name="history_changes">New: %1$d · Fixed: %2$d</string>
+    <string name="dashboard_since_last">Since your last scan</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_background">Background</string>
+    <string name="settings_daily">Daily scan</string>
+    <string name="settings_daily_desc">Runs about once a day while the battery is not low. You are notified only when a new finding appears.</string>
+    <string name="settings_daily_needs_history">Turn on history to use the daily scan.</string>
+    <string name="settings_history">Save scan history</string>
+    <string name="settings_history_desc">Keeps the newest 30 reports on this device only.</string>
+    <string name="settings_clear">Clear history</string>
+    <string name="settings_clear_title">Delete all saved reports?</string>
+    <string name="settings_clear_body">Every saved scan is removed from this device. This cannot be undone.</string>
+    <string name="settings_delete">Delete</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_language">App language</string>
+    <string name="settings_language_desc">Opens the system language settings for this app.</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_privacy">Scans run on this device. There is no account and no server. A report leaves the device only when you share it.</string>
 </resources>

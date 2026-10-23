@@ -1,28 +1,17 @@
 name: Supply chain
 
 on:
-  pull_request:
-    branches: [ master ]
-  push:
-    branches: [ master ]
-  schedule:
-    - cron: '41 4 * * 2'
+  # Manual only: nothing here runs on push, pull request or a schedule, so no minutes are spent
+  # unless a maintainer starts the workflow from the Actions tab.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  dependency-review:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: high
-
   scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       security-events: write

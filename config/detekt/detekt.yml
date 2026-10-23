@@ -1,0 +1,49 @@
+# Defaults plus the few rules that need a different shape for Compose and a scanner with many small checks.
+complexity:
+  CyclomaticComplexMethod:
+    threshold: 20
+    ignoreSimpleWhenEntries: true
+    ignoreAnnotated: [ 'Composable' ]
+  LongMethod:
+    threshold: 80
+    ignoreAnnotated: [ 'Composable' ]
+    excludes: [ '**/presentation/content/**' ]
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 10
+    ignoreAnnotated: [ 'Composable', 'Inject' ]
+  TooManyFunctions:
+    thresholdInFiles: 20
+    thresholdInClasses: 20
+    excludes: [ '**/di/**', '**/test/**' ]
+    ignoreAnnotated: [ 'Composable' ]
+naming:
+  FunctionNaming:
+    ignoreAnnotated: [ 'Composable' ]
+    excludes: [ '**/test/**' ]
+  MatchingDeclarationName:
+    excludes: [ '**/presentation/content/**' ]
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+style:
+  MagicNumber:
+    ignoreAnnotated: [ 'Composable' ]
+    # Thresholds, weights, byte offsets and ASN.1 tags are the content of these files.
+    excludes:
+      - '**/test/**'
+      - '**/theme/**'
+      - '**/components/**'
+      - '**/data/check/**'
+      - '**/domain/model/**'
+      - '**/domain/scan/ScoreCalculator.kt'
+    ignoreNamedArgument: true
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+  MaxLineLength:
+    maxLineLength: 120
+    excludeCommentStatements: true
+  ReturnCount:
+    max: 6
+    excludeGuardClauses: true
+  UnusedPrivateMember:
+    ignoreAnnotated: [ 'Preview' ]

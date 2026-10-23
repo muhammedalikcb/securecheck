@@ -13,6 +13,7 @@ import com.muhammedalikocabey.securecheck.domain.scan.SecurityCheck
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.security.SecureRandom
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -37,7 +38,10 @@ class PlayIntegrityCheck @Inject constructor(private val context: Context, priva
         return try {
             IntegrityManagerFactory.create(context).requestIntegrityToken(request).await()
             CheckResult.info(id, listOf("token issued", "verdict must be verified on a server"))
-        } catch (e: Exception) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // Play services reports failures as several unrelated types; every one of them means "could not run".
             CheckResult.unavailable(id, UnavailableReason.ERROR, listOf(e.javaClass.simpleName))
         }
     }

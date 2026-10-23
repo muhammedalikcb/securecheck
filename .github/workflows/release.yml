@@ -1,10 +1,14 @@
 name: Release
 
-# Runs only for a version tag that a maintainer pushes. The signing key lives in repository secrets,
-# never in the repository. Without those secrets the job stops before it builds anything.
+# Manual only. The signing key lives in repository secrets, never in the repository. Without those
+# secrets the job stops before it builds anything. The result is always a draft.
 on:
-  push:
-    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Version tag for the draft release, for example v2.0.0
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -37,7 +41,7 @@ jobs:
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-        run: ./gradlew spotlessCheck lintDebug testDebugUnitTest assembleRelease
+        run: ./gradlew spotlessCheck detekt lintDebug testDebugUnitTest assembleRelease
 
       - name: Checksums
         run: |
@@ -48,6 +52,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          tag_name: ${{ inputs.tag }}
           files: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/apk/release/SHA256SUMS.txt

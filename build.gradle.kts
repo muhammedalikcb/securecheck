@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.kover) apply false
     alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
 }
 
 spotless {
@@ -23,4 +24,11 @@ spotless {
         target("*.gradle.kts", "app/*.gradle.kts")
         ktlint(libs.versions.ktlint.get())
     }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom("config/detekt/detekt.yml")
+    source.setFrom("app/src/main/java", "app/src/test/java")
+    parallel = true
 }

@@ -19,7 +19,7 @@ class XposedCheck @Inject constructor(
 
     override suspend fun run(): CheckResult {
         val maps = files.readLines("/proc/self/maps").orEmpty()
-        val stack = Throwable().stackTrace.map { it.className }
+        val stack = Throwable("stack probe").stackTrace.map { it.className }
         val signals = signals(
             maps = maps,
             classPath = System.getenv("CLASSPATH").orEmpty(),

@@ -184,6 +184,16 @@ class SecureCheckAppTest {
     }
 
     @Test
+    @Config(qualifiers = "w1024dp-h700dp-mdpi")
+    fun `wide screens show the summary beside the findings`() {
+        show(ScanUiState.Done(sampleReport()))
+        rule.onNodeWithText(string(R.string.action_scan_again)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.section_fix_first)).assertIsDisplayed()
+        rule.onNodeWithText(string(R.string.section_categories)).assertIsDisplayed()
+        screenshot("dashboard-wide")
+    }
+
+    @Test
     @Config(qualifiers = "w411dp-h891dp-xxhdpi", fontScale = 1.6f)
     fun `large font keeps rows readable`() {
         show(ScanUiState.Done(sampleReport()))

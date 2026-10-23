@@ -29,6 +29,8 @@ with a test for the finding and the clean case, mapped to an OWASP MASVS control
   </tr>
 </table>
 
+<p align="center"><img src="docs/screenshots/dashboard-wide.png" alt="Wide layout" width="560"/></p>
+
 <sub>Screenshots are rendered by the Robolectric UI tests, not captured on a physical device.</sub>
 
 ## What it does
@@ -43,6 +45,7 @@ with a test for the finding and the clean case, mapped to an OWASP MASVS control
   you share it.
 * **Accessible by design.** Status is never color alone, touch targets are at least 48 dp, large font sizes and
   reduced motion are respected, light and dark themes are contrast-tested.
+* **Adapts to wide screens.** From 840 dp the score stays pinned on the left while findings scroll on the right.
 * **English and Turkish**, switchable per app on Android 13 and later.
 
 ## Checks
@@ -101,7 +104,7 @@ private app storage and leave it only through the Android share sheet when you c
 
 ## Build
 
-JDK 17 and the Android SDK.
+JDK 17 and the Android SDK. Static analysis is [detekt](config/detekt/detekt.yml) and ktlint (via Spotless).
 
 ```bash
 git clone https://github.com/muhammedalikcb/securecheck.git
@@ -112,7 +115,7 @@ cd securecheck
 A debug build reports some checks differently on purpose (debuggable, code shrinking, install source, signature).
 
 ```bash
-./gradlew spotlessCheck lintDebug testDebugUnitTest assembleRelease   # what CI runs
+./gradlew spotlessCheck detekt lintDebug testDebugUnitTest assembleRelease   # what CI runs
 ```
 
 Release signing is read from Gradle properties or environment variables (`RELEASE_STORE_FILE`,
@@ -139,10 +142,18 @@ Every exported report carries a `schemaVersion` and stable check keys, so report
 
 ## Supply chain
 
-CI runs formatting, lint (warnings are errors), unit tests with coverage, and builds debug and release on every push.
-CodeQL and a Trivy scan run on a schedule and on pull requests, a CycloneDX SBOM is produced by the supply-chain
-workflow, and Dependabot proposes updates weekly. Releases are built by a workflow that signs with keys held in
-repository secrets and publishes a draft with SHA-256 sums.
+The workflows under `.github/workflows` are **manual only**: nothing runs on push, pull request or a schedule, so no
+CI minutes are spent until a maintainer starts one from the Actions tab.
+
+| Workflow | What it does |
+| --- | --- |
+| CI | formatting, static analysis, lint (warnings are errors), unit tests with coverage, debug and release builds |
+| CodeQL | code scanning for Kotlin |
+| Supply chain | Trivy scan of dependencies, secrets and configuration, plus a CycloneDX SBOM |
+| Release | builds a signed APK from repository secrets and creates a **draft** release with SHA-256 sums |
+
+Everything CI does can be run locally with the commands in [Build](#build). Dependabot proposes dependency updates
+monthly.
 
 ## Contributing
 

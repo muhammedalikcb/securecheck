@@ -2,6 +2,7 @@ package com.muhammedalikocabey.securecheck.presentation.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,9 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -55,6 +60,9 @@ import com.muhammedalikocabey.securecheck.presentation.theme.SecureTheme
 
 private const val TOP_FINDINGS = 3
 private val ContentMaxWidth = 640.dp
+private val TwoPaneMinWidth = 840.dp
+private val TwoPaneMaxWidth = 1120.dp
+private val SummaryPaneWidth = 340.dp
 
 @Composable
 fun DashboardScreen(
@@ -69,47 +77,77 @@ fun DashboardScreen(
     onOpenSettings: () -> Unit = {},
     onShare: (ExportFormat) -> Unit = {},
 ) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        LazyColumn(
-            Modifier.widthIn(max = ContentMaxWidth).fillMaxSize(),
-            contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item(key = "toolbar") { Toolbar(onOpenHistory, onOpenSettings, onShare) }
-            item(key = "summary") { Summary(report, diff) }
-            if (report.app.debugBuild) item(key = "debug") { DebugBanner() }
-
-            val top = report.prioritizedFindings().take(TOP_FINDINGS)
-            if (top.isNotEmpty()) {
-                item(key = "fix-title") { SectionTitle(stringResource(R.string.section_fix_first)) }
-                item(key = "fix-list") { ResultList(top, onSelect = onSelectCheck) }
-            }
-
-            item(key = "categories-title") { SectionTitle(stringResource(R.string.section_categories)) }
-            items(Category.entries.chunked(2), key = { row -> row.first().name }) { row ->
-                Row(
-                    Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    BoxWithConstraints(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        if (maxWidth >= TwoPaneMinWidth) {
+            // Tablets, foldables and landscape: the score stays in view while the findings scroll beside it.
+            Row(
+                Modifier.widthIn(max = TwoPaneMaxWidth).fillMaxSize().padding(contentPadding),
+                horizontalArrangement = Arrangement.spacedBy(32.dp),
+            ) {
+                Column(
+                    Modifier.width(SummaryPaneWidth).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    for (category in row) {
-                        CategoryCard(
-                            category,
-                            report.results.filter { it.id.category == category },
-                            onClick = { onSelectCategory(category) },
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                        )
-                    }
+                    Toolbar(onOpenHistory, onOpenSettings, onShare)
+                    Summary(report, diff)
+                    if (report.app.debugBuild) DebugBanner()
+                    ScanAgainButton(onScanAgain)
+                }
+                LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    findingsAndCategories(report, onSelectCheck, onSelectCategory)
                 }
             }
-
-            item(key = "scan-again") {
-                Button(
-                    onClick = onScanAgain,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                ) { Text(stringResource(R.string.action_scan_again)) }
+        } else {
+            LazyColumn(
+                Modifier.widthIn(max = ContentMaxWidth).fillMaxSize(),
+                contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                item(key = "toolbar") { Toolbar(onOpenHistory, onOpenSettings, onShare) }
+                item(key = "summary") { Summary(report, diff) }
+                if (report.app.debugBuild) item(key = "debug") { DebugBanner() }
+                findingsAndCategories(report, onSelectCheck, onSelectCategory)
+                item(key = "scan-again") { ScanAgainButton(onScanAgain) }
             }
         }
     }
+}
+
+private fun LazyListScope.findingsAndCategories(
+    report: ScanReport,
+    onSelectCheck: (CheckResult) -> Unit,
+    onSelectCategory: (Category) -> Unit,
+) {
+    val top = report.prioritizedFindings().take(TOP_FINDINGS)
+    if (top.isNotEmpty()) {
+        item(key = "fix-title") { SectionTitle(stringResource(R.string.section_fix_first)) }
+        item(key = "fix-list") { ResultList(top, onSelect = onSelectCheck) }
+    }
+
+    item(key = "categories-title") { SectionTitle(stringResource(R.string.section_categories)) }
+    items(Category.entries.chunked(2), key = { row -> row.first().name }) { row ->
+        Row(
+            Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            for (category in row) {
+                CategoryCard(
+                    category,
+                    report.results.filter { it.id.category == category },
+                    onClick = { onSelectCategory(category) },
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScanAgainButton(onScanAgain: () -> Unit) {
+    Button(
+        onClick = onScanAgain,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+    ) { Text(stringResource(R.string.action_scan_again)) }
 }
 
 @Composable

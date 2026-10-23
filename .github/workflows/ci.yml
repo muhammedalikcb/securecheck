@@ -9,10 +9,14 @@ on:
 permissions:
   contents: read
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -23,8 +27,23 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build and run unit tests
-        run: ./gradlew assembleDebug testDebugUnitTest
+      - name: Format, lint and unit tests
+        run: ./gradlew spotlessCheck lintDebug testDebugUnitTest koverXmlReportDebug
+
+      - name: Build debug and release
+        run: ./gradlew assembleDebug assembleRelease
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            app/build/reports/tests
+            app/build/reports/lint-results-debug.html
+            app/build/reports/kover/reportDebug.xml
+            app/build/screenshots
+          if-no-files-found: ignore
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4

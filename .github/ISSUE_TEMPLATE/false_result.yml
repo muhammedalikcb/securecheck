@@ -1,0 +1,24 @@
+name: False positive or false negative
+description: A check flags a clean device, or misses a real problem
+labels: [ detection ]
+body:
+  - type: input
+    id: check
+    attributes:
+      label: Check
+      placeholder: root, frida, user_ca ...
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [ False positive (flagged, but device is fine), False negative (missed a real problem) ]
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Device, ROM and tools involved
+    validations:
+      required: true

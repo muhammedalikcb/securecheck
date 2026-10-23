@@ -1,0 +1,31 @@
+name: Bug report
+description: A check gives a wrong result, or something does not work
+labels: [ bug ]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the check name and what you expected instead.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Pixel 8, Android 15
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: 2.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Exported report (optional)
+      description: Share as JSON from the app. It lists the device model and technical evidence, so remove anything you do not want public.
+      render: json

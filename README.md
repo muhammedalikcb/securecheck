@@ -1,232 +1,175 @@
 # SecureCheck
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/muhammedalikcb/securecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/muhammedalikcb/securecheck/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/muhammedalikcb/securecheck/actions/workflows/codeql.yml/badge.svg)](https://github.com/muhammedalikcb/securecheck/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)
 ![minSdk](https://img.shields.io/badge/minSdk-24-3DDC84?logo=android&logoColor=white)
 ![targetSdk](https://img.shields.io/badge/targetSdk-36-3DDC84?logo=android&logoColor=white)
-[![GitHub stars](https://img.shields.io/github/stars/muhammedalikcb/securecheck?style=social)](https://github.com/muhammedalikcb/securecheck/stargazers)
 
-SecureCheck is an open source Android app that runs 23 device and app integrity checks at launch and shows the result on one screen. Root, debugger, Frida, Xposed, emulator, tampering, Play Integrity, SSL pinning, WebView settings and more.
+SecureCheck inspects the Android device it runs on and the app itself, and turns 27 checks into one score, a short
+list of what to fix first, and a report you can share. Everything runs on the device. There is no account and no
+server.
 
-I built it to show how these checks look in a real project structure (MVVM, Clean Architecture, Dagger 2), not as one big utility class. Every check is its own detector and use case, so you can read, test or copy them one by one.
+It is also a reference for how these checks look in a real project: each one is a small class behind an interface,
+with a test for the finding and the clean case, mapped to an OWASP MASVS control.
 
-[Türkçe açıklama aşağıda.](#türkçe)
-
-## Contents
-
-* [Checks](#checks)
-* [Screenshots](#screenshots)
-* [Download](#download)
-* [Build and run](#build-and-run)
-* [Architecture](#architecture)
-* [Exported report](#exported-report)
-* [Testing and debugging](#testing-and-debugging)
-* [Ideas for later](#ideas-for-later)
-* [Contributing](#contributing)
-* [License](#license)
-
-## Checks
-
-| Check | What it looks at |
-| --- | --- |
-| Root | Known su paths and root apps, `which su`, test-keys builds, `ro.debuggable` and `ro.secure` |
-| Debugger | Whether a debugger is attached |
-| Installer | Whether the app was installed from Google Play |
-| APK signature | Compares the signing certificate's SHA-256 with an expected hash that is stored encrypted (AES key in Android Keystore) |
-| Tampering | Package name and signature mismatch, plus generic or SDK build fingerprints |
-| Play Integrity | Requests a Play Integrity token. Real verdict checks need a backend, which this demo doesn't have |
-| Obfuscation | Whether R8/ProGuard was applied |
-| Encrypted storage | Whether EncryptedSharedPreferences and EncryptedFile work |
-| Exported components | Exported activities, services, receivers and providers |
-| PendingIntent | Mutable PendingIntents (`FLAG_MUTABLE`) |
-| SSL pinning | Connects with a trust manager that only accepts the bundled certificate |
-| Intent hijacking | Intents that other apps could also resolve |
-| Debuggable build | `android:debuggable=true` |
-| Dynamic dex | Dex files loaded at runtime |
-| Reflection | Reflection-style methods (`invoke`, `access$`, `reflect`) in app classes |
-| Frida | frida-server and gadget files, port 27042, Frida in the process memory map |
-| Xposed | Xposed framework classes on the classpath |
-| WebView | JavaScript enabled, file access allowed, insecure JS interfaces (3 checks) |
-| Emulator, VPN, mock location | Counted in the risk level, not shown as separate rows |
-
-All results go into a single `SecurityState`, which drives the UI, the risk level and the JSON export.
-
-## Screenshots
+[Türkçe özet aşağıda.](#türkçe)
 
 <table>
   <tr>
-    <th>MotionLayout transition</th>
-    <th>Scan result</th>
+    <td align="center"><img src="docs/screenshots/dashboard-light-en.png" alt="Dashboard" width="240"/></td>
+    <td align="center"><img src="docs/screenshots/sheet-finding-en.png" alt="Finding detail" width="240"/></td>
+    <td align="center"><img src="docs/screenshots/history-en.png" alt="Scan history" width="240"/></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/images/motion.gif" alt="MotionLayout transition" width="320"/></td>
-    <td align="center"><img src="docs/images/security_report.png" alt="Scan result screen" width="320"/></td>
+    <td align="center"><img src="docs/screenshots/dashboard-dark-tr.png" alt="Dark theme, Turkish" width="240"/></td>
+    <td align="center"><img src="docs/screenshots/category-network-en.png" alt="Category" width="240"/></td>
+    <td align="center"><img src="docs/screenshots/settings-dark-tr.png" alt="Settings" width="240"/></td>
   </tr>
 </table>
 
-## Download
+<sub>Screenshots are rendered by the Robolectric UI tests, not captured on a physical device.</sub>
 
-Grab the signed APK from the [latest release](https://github.com/muhammedalikcb/securecheck/releases/latest) if you just want to see the checks on your own device.
+## What it does
 
-## Build and run
+* **Score and risk.** One number from 0 to 100 and a label (Low, Moderate, High, Critical), with the findings that
+  cost the most listed first.
+* **Evidence.** Every result shows what was found, how sure the check is, and how to fix it.
+* **History.** The newest 30 scans stay on the device, and the dashboard shows what changed since the last one.
+* **Daily scan (optional).** Runs about once a day while the battery is not low, and notifies only when a new
+  finding appears. Off by default.
+* **Share.** Export a scan as JSON or as a single self-contained HTML page. A report leaves the device only when
+  you share it.
+* **Accessible by design.** Status is never color alone, touch targets are at least 48 dp, large font sizes and
+  reduced motion are respected, light and dark themes are contrast-tested.
+* **English and Turkish**, switchable per app on Android 13 and later.
+
+## Checks
+
+| Category | Check | MASVS control |
+| --- | --- | --- |
+| Device integrity | Root access, Hardware key attestation, Screen lock, Security patch level, Developer options, USB debugging, Emulator, Biometric lock, Play Integrity | RESILIENCE-1, AUTH-2, CODE-1 |
+| App integrity | App signature, Install source, Debuggable build, Code shrinking, Target SDK | RESILIENCE-2/3/4, CODE-1 |
+| Runtime | Debugger, Frida instrumentation, Xposed and LSPosed, Magisk, Injected code | RESILIENCE-1/2/4 |
+| Network | VPN, HTTP proxy, User certificates, Cleartext traffic | NETWORK-1 |
+| Data | Hardware-backed keystore, App backup | CRYPTO-2, STORAGE-2 |
+| Platform | Exported components, Accessibility services | PLATFORM-1/3 |
+
+A check has one of five outcomes: passed, finding, informational, expected (for example "debuggable" on a debug
+build), or not run (with the reason). A check that could not run is never reported as passed.
+
+### How the score works
+
+```
+score = 100 − Σ (severity weight × confidence factor)      over findings
+```
+
+| Severity | Weight | | Confidence | Factor |
+| --- | --- | --- | --- | --- |
+| Critical | 25 | | High | 1.0 |
+| High | 15 | | Medium | 0.6 |
+| Medium | 8 | | Low | 0.3 |
+| Low | 3 | | | |
+| Info | 0 | | | |
+
+* A confirmed (high confidence) high or critical finding caps the score at 69, so a rooted device cannot read as
+  good because everything else passed.
+* Labels: 90 and above is Low risk, 70 to 89 Moderate, 40 to 69 High, below 40 Critical.
+* Checks that could not run lower the **coverage** figure ("96% of checks could run") instead of improving the score.
+
+## Limits you should know about
+
+These are the reasons the app calls its results signals, not verdicts.
+
+* **Client-side checks can be bypassed.** A device an attacker controls can hide from any check that runs on it.
+  Root hiders and renamed Frida builds exist. Treat a clean result as "nothing obvious", not "safe".
+* **Play Integrity and key attestation need a server.** The app can request a token and read a hardware key
+  certificate, but only a backend can verify them. The app says so instead of claiming a verdict. See
+  [docs/play-integrity-backend.md](docs/play-integrity-backend.md). No backend is included.
+* **History is not encrypted.** Reports sit in the app's private storage, are excluded from backups and device
+  transfers, and are readable only on a rooted device. If your threat model includes that, turn history off.
+* **Exports contain the device model and technical evidence** (paths, package names). Review before sharing publicly.
+* **Verified with JVM and Robolectric tests**, not an instrumented run on every device and ROM. Heuristics vary by
+  manufacturer, so please report false results with the issue template.
+
+## Privacy
+
+No analytics, no crash reporting, no network calls, no accounts. The only permission requested at runtime is
+notifications, and only when you turn on the daily scan; the scan still runs if you decline. Reports are written to
+private app storage and leave it only through the Android share sheet when you choose to share.
+
+## Build
+
+JDK 17 and the Android SDK.
 
 ```bash
 git clone https://github.com/muhammedalikcb/securecheck.git
 cd securecheck
-./gradlew clean assembleDebug
+./gradlew assembleDebug
 ```
 
-The checks start as soon as `MainActivity` opens. Keep in mind that a debug build fails some checks on purpose (debuggable, obfuscation, installer, signature).
+A debug build reports some checks differently on purpose (debuggable, code shrinking, install source, signature).
+
+```bash
+./gradlew spotlessCheck lintDebug testDebugUnitTest assembleRelease   # what CI runs
+```
+
+Release signing is read from Gradle properties or environment variables (`RELEASE_STORE_FILE`,
+`RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`); without them a release build falls back to
+the debug key so the project still builds for everyone. To enable the Play Integrity request, set
+`SECURECHECK_INTEGRITY_PROJECT_NUMBER`.
 
 ## Architecture
 
-MVVM and Clean Architecture, with Dagger 2 for dependency injection.
+MVVM and Clean Architecture, Dagger 2 with KSP, Jetpack Compose, Kotlin coroutines and Flow.
 
 ```
-UI (Compose) -> ViewModel -> CompositeCheckSecurityUseCase -> use cases -> detectors -> SecurityState
+presentation/   Compose screens, design system, ViewModels
+domain/         models, ScanEngine, ScoreCalculator, history and settings contracts (no Android types)
+data/           one class per check, report storage, export, WorkManager, notifications
+di/             Dagger component and modules
 ```
 
-```
-core/
-  reverseanalysis/   Frida, Xposed, emulator
-  crypto/            SecureCipher (AES with Android Keystore)
-  network/           SSL pinning, VPN
-  icc/               exported components, intent hijacking, PendingIntent
-  webview/           WebView settings
-  location/          mock location
-  obfuscation/, reflection/, tamper/
-data/
-  detector/          root, debugger, installer, integrity, signature, tamper
-  local/secure/      encrypted storage
-  log/               JSON export
-domain/
-  usecase/           one use case per check, plus the composite one
-  model/             SecurityState, AppIntegritySnapshot
-  extension/         risk level and passed check count
-presentation/
-  screen/security/   Compose screen, MotionLayout, ViewModel
-di/                  Dagger component and modules
-```
+`ScanEngine` runs the registered checks concurrently and emits progress events. A check that throws becomes "not run",
+never "passed". The domain layer has no Android dependencies, so the score, the diff between scans and the
+background-scan rules are plain JVM tests.
 
-Data flows one way, from the detectors up to the UI. Layers only talk to the one below them, and every detector sits behind an interface so it can be faked in tests and previews.
+Every exported report carries a `schemaVersion` and stable check keys, so reports from older versions stay readable.
 
-## Exported report
+## Supply chain
 
-The "Export report" button writes the full state to `files/security_log.json` in the app's private storage. A shortened example:
-
-```json
-{
-  "isRooted": false,
-  "isDebuggerAttached": false,
-  "isFromPlayStore": true,
-  "isSignatureValid": true,
-  "isGenuine": true,
-  "isTampered": false,
-  "isSslPinningPassed": true,
-  "webView": {
-    "isJsEnabled": false,
-    "isFileAccessAllowed": false,
-    "hasInsecureJsInterface": false
-  },
-  "isFridaDetected": false,
-  "riskLevel": "Safe",
-  "overallSafe": true,
-  "timestamp": 1715523375000
-}
-```
-
-## Testing and debugging
-
-* `FakeStateFactory` builds safe and risky states for Compose previews (for example `PreviewSecurityStatusScreenSafe`).
-* `SecurityLogExporter` writes the JSON report.
-* `SecureStorageManager` exercises EncryptedSharedPreferences and EncryptedFile.
-* SSL pinning uses `res/raw/securecheck_cert.cer`, a self-signed certificate for `securecheck.local`. To see the check pass, point `securecheck.local` at a local HTTPS server that uses the matching key, or replace the file with your own server's certificate.
-
-## Ideas for later
-
-Not built yet, but on my list:
-
-| Idea | Approach |
-| --- | --- |
-| SELinux mode | Read `getenforce` and flag Permissive |
-| Open ports | Look for unexpected listening ports |
-| Sandbox escapes | `run-as`, world-readable files, shared UIDs |
-| Native anti-debugging | `ptrace` and signal based checks in C++ |
-| Hidden root | MagiskHide, Zygisk and similar cloaking |
-| MITM proxies | User-installed CAs, proxy settings, Burp certificates |
+CI runs formatting, lint (warnings are errors), unit tests with coverage, and builds debug and release on every push.
+CodeQL and a Trivy scan run on a schedule and on pull requests, a CycloneDX SBOM is produced by the supply-chain
+workflow, and Dependabot proposes updates weekly. Releases are built by a workflow that signs with keys held in
+repository secrets and publishes a draft with SHA-256 sums.
 
 ## Contributing
 
-Pull requests are welcome. New detectors, better heuristics for the existing ones and Compose UI tests would all help. If you're adding a check, follow the existing pattern: a detector behind an interface, a use case, a field in `SecurityState` and strings in both languages.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Security problems: [SECURITY.md](SECURITY.md).
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
 
-Made by [Muhammed Ali Kocabey](https://github.com/muhammedalikcb) · [muhammedalikocabey.com](https://muhammedalikocabey.com) · [Shaping the Future of Android (podcast)](https://open.spotify.com/show/7waAQAWmr2WIQNTlTJkkos) · [Medium](https://medium.com/@muhammedalikocabey)
+Made by [Muhammed Ali Kocabey](https://github.com/muhammedalikcb) · [muhammedalikocabey.com](https://muhammedalikocabey.com) · [Medium](https://medium.com/@muhammedalikocabey)
 
 ---
 
 ## Türkçe
 
-SecureCheck, uygulama açılırken 23 cihaz ve uygulama bütünlüğü kontrolü çalıştırıp sonucu tek ekranda gösteren açık kaynak bir Android uygulaması. Root, debugger, Frida, Xposed, emülatör, APK değişikliği, Play Integrity, SSL pinning, WebView ayarları ve daha fazlası.
+SecureCheck, çalıştığı Android cihazı ve uygulamanın kendisini inceler; 27 kontrolü tek bir skora, önce
+düzeltilecekler listesine ve paylaşılabilir bir rapora dönüştürür. Her şey cihazda çalışır: hesap yok, sunucu yok.
 
-Bu kontrollerin gerçek bir proje yapısında (MVVM, Clean Architecture, Dagger 2) nasıl durduğunu göstermek için yazdım. Her kontrol ayrı bir detector ve use case, yani tek tek okuyabilir, test edebilir ya da kendi projene alabilirsin.
+* 0–100 skor ve risk etiketi (Düşük, Orta, Yüksek, Kritik); her sonuçta kanıt, güven düzeyi ve düzeltme yolu.
+* Son 30 tarama cihazda saklanır, kontrol paneli bir önceki taramadan beri değişeni gösterir.
+* İsteğe bağlı günlük tarama: yalnızca yeni bir bulgu çıkarsa bildirim verir. Varsayılan olarak kapalıdır.
+* Raporu JSON veya tek dosyalık HTML olarak paylaşırsınız; rapor yalnızca siz paylaşırsanız cihazdan çıkar.
+* Türkçe ve İngilizce, Android 13 ve üzerinde uygulama başına dil seçimi.
 
-### Kontroller
+**Sınırlar:** Cihaz üzerinde çalışan kontroller, cihazı ele geçiren biri tarafından atlatılabilir; temiz sonuç
+"bariz bir şey yok" demektir, "güvenli" demek değildir. Play Integrity ve anahtar doğrulaması yalnızca bir sunucuda
+doğrulanabilir ([belge](docs/play-integrity-backend.md)). Geçmiş şifrelenmez; özel depolamada tutulur ve
+yedeklere dahil edilmez.
 
-* Root, debugger, emülatör, Frida ve Xposed tespiti
-* Play Integrity token isteği (gerçek doğrulama için backend gerekir, bu demoda yok)
-* APK imzası (SHA-256, beklenen hash Android Keystore'daki AES anahtarıyla şifreli tutulur) ve R8/ProGuard kontrolü
-* APK üzerinde değişiklik, debuggable build ve dinamik dex yükleme tespiti
-* Exported component, intent kaçırma ve mutable PendingIntent kontrolleri
-* Gömülü sertifikayla SSL pinning
-* WebView'da JavaScript, dosya erişimi ve güvensiz JS interface kontrolleri
-* VPN ve sahte konum tespiti (risk seviyesine dahil)
-
-Tüm sonuçlar tek bir `SecurityState` içinde toplanıyor. Arayüz, risk seviyesi ve JSON raporu buradan besleniyor.
-
-### İndirme
-
-Sadece kendi cihazında denemek istiyorsan imzalı APK'yı [son sürümden](https://github.com/muhammedalikcb/securecheck/releases/latest) indirebilirsin.
-
-### Kurulum
-
-```bash
-git clone https://github.com/muhammedalikcb/securecheck.git
-cd securecheck
-./gradlew clean assembleDebug
-```
-
-Kontroller `MainActivity` açılınca başlıyor. Debug build'de bazı kontrollerin (debuggable, obfuscation, kaynak, imza) bilerek başarısız olduğunu unutma.
-
-### Mimari
-
-* `core/`: Düşük seviyeli dedektörler (Frida, Xposed, emülatör, SSL pinning, VPN, WebView)
-* `data/`: Root, debugger, imza, Play Integrity gibi dedektörler, şifreli depolama ve JSON export
-* `domain/`: Her kontrol için bir use case, `SecurityState` ve risk hesabı
-* `presentation/`: Compose ekranı, MotionLayout ve ViewModel
-* `di/`: Dagger component ve modülleri
-
-### Rapor
-
-"Raporu Dışa Aktar" butonu tüm durumu uygulamanın özel dizinine, `files/security_log.json` dosyasına yazar. Örnek format yukarıdaki İngilizce bölümde.
-
-### Test ve debug
-
-* `FakeStateFactory` Compose önizlemeleri için güvenli ve riskli durumlar üretir.
-* `SecureStorageManager` EncryptedSharedPreferences ve EncryptedFile'ı dener.
-* SSL pinning için `res/raw/securecheck_cert.cer` kullanılıyor (`securecheck.local` için self-signed). Kontrolün geçtiğini görmek için `securecheck.local` adresini aynı anahtarı kullanan yerel bir HTTPS sunucusuna yönlendir ya da dosyayı kendi sunucunun sertifikasıyla değiştir.
-
-### Sonra eklemek istediklerim
-
-SELinux modu, açık port taraması, sandbox kaçışları (`run-as`, herkesin okuyabildiği dosyalar), native anti-debug (`ptrace`), gizlenmiş root (MagiskHide, Zygisk) ve MITM proxy tespiti.
-
-### Katkı
-
-PR'lara açığım. Yeni dedektörler, mevcut kontrollerin iyileştirilmesi ya da Compose UI testleri çok işe yarar. Yeni bir kontrol eklerken mevcut düzeni takip etmen yeterli: interface arkasında bir dedektör, bir use case, `SecurityState` içinde bir alan ve iki dilde string.
-
-### Lisans
-
-MIT. Ayrıntılar [LICENSE](LICENSE) dosyasında.
+Kurulum: `./gradlew assembleDebug`

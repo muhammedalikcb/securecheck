@@ -13,6 +13,10 @@ JDK 17 and the Android SDK (compile SDK 36). Then:
 The same command runs in CI. Lint and Kotlin warnings are errors, so a clean build is the bar.
 `./gradlew spotlessApply` fixes formatting.
 
+`scripts/verify-release-shrinking.sh` builds the release variant and checks in R8's `mapping.txt` that the code-shrinking
+probe class was renamed. Run it after touching `proguard-rules.pro`. The instrumented smoke test in `app/src/androidTest`
+needs a device or emulator: `./gradlew connectedDebugAndroidTest`.
+
 ## Adding a check
 
 1. Add a `CheckId` entry. Its `key` is written to exported reports, so pick it once and never rename it.

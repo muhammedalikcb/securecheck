@@ -8,14 +8,23 @@ import androidx.compose.ui.graphics.Color
 class Tone(val main: Color, val container: Color, val onContainer: Color)
 
 @Immutable
-class SecureColors(val success: Tone, val warning: Tone, val critical: Tone, val info: Tone, val neutral: Tone)
+class SecureColors(
+    val success: Tone,
+    val warning: Tone,
+    val critical: Tone,
+    val info: Tone,
+    val neutral: Tone,
+    /** The unfilled part of a ring or bar; dark enough to be seen on the card behind it. */
+    val track: Color,
+)
 
 internal val LightSecureColors = SecureColors(
-    success = Tone(Color(0xFF0F7A4B), Color(0xFFDDF3E7), Color(0xFF0A4F31)),
-    warning = Tone(Color(0xFF8A5A00), Color(0xFFFFF0CC), Color(0xFF5C3B00)),
-    critical = Tone(Color(0xFFB3261E), Color(0xFFFBE3E1), Color(0xFF7A1913)),
-    info = Tone(Color(0xFF0B5CAD), Color(0xFFDCEBFA), Color(0xFF07396B)),
+    success = Tone(Color(0xFF0F7A4B), Color(0xFFCFEBDC), Color(0xFF0A4F31)),
+    warning = Tone(Color(0xFF8A5A00), Color(0xFFFFE8B0), Color(0xFF5C3B00)),
+    critical = Tone(Color(0xFFB3261E), Color(0xFFF9D4D0), Color(0xFF7A1913)),
+    info = Tone(Color(0xFF0B5CAD), Color(0xFFCFE2F7), Color(0xFF07396B)),
     neutral = Tone(Color(0xFF55667A), Color(0xFFEDF1F5), Color(0xFF3A4856)),
+    track = Color(0xFF9AA9B8),
 )
 
 internal val DarkSecureColors = SecureColors(
@@ -24,6 +33,7 @@ internal val DarkSecureColors = SecureColors(
     critical = Tone(Color(0xFFFF8A80), Color(0xFF4A1511), Color(0xFFFFD2CE)),
     info = Tone(Color(0xFF7DB7FF), Color(0xFF0F2740), Color(0xFFCFE5FF)),
     neutral = Tone(Color(0xFFA9B7C4), Color(0xFF1E2A35), Color(0xFFD3DCE4)),
+    track = Color(0xFF4A5E70),
 )
 
 internal object Palette {

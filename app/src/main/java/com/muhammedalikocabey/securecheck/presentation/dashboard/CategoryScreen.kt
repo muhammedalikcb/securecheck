@@ -17,6 +17,7 @@ import com.muhammedalikocabey.securecheck.R
 import com.muhammedalikocabey.securecheck.domain.model.Category
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
 import com.muhammedalikocabey.securecheck.domain.model.CheckStatus
+import com.muhammedalikocabey.securecheck.presentation.components.ContentMaxWidth
 import com.muhammedalikocabey.securecheck.presentation.components.ResultList
 import com.muhammedalikocabey.securecheck.presentation.components.ScreenHeader
 import com.muhammedalikocabey.securecheck.presentation.content.labelRes
@@ -43,7 +44,7 @@ fun CategoryScreen(
     )
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
-            Modifier.widthIn(max = 640.dp).fillMaxSize(),
+            Modifier.widthIn(max = ContentMaxWidth).fillMaxSize(),
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

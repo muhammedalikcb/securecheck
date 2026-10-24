@@ -4,13 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,12 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,10 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.muhammedalikocabey.securecheck.R
 import com.muhammedalikocabey.securecheck.domain.export.ExportFormat
@@ -47,7 +46,9 @@ import com.muhammedalikocabey.securecheck.domain.history.ReportDiff
 import com.muhammedalikocabey.securecheck.domain.model.Category
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
 import com.muhammedalikocabey.securecheck.domain.model.ScanReport
-import com.muhammedalikocabey.securecheck.presentation.components.CategoryCard
+import com.muhammedalikocabey.securecheck.presentation.components.CategoryList
+import com.muhammedalikocabey.securecheck.presentation.components.ContentMaxWidth
+import com.muhammedalikocabey.securecheck.presentation.components.ListRowMinHeight
 import com.muhammedalikocabey.securecheck.presentation.components.OutlinedCard
 import com.muhammedalikocabey.securecheck.presentation.components.ResultList
 import com.muhammedalikocabey.securecheck.presentation.components.ScoreRing
@@ -59,7 +60,6 @@ import com.muhammedalikocabey.securecheck.presentation.theme.NumericStyle
 import com.muhammedalikocabey.securecheck.presentation.theme.SecureTheme
 
 private const val TOP_FINDINGS = 3
-private val ContentMaxWidth = 640.dp
 private val TwoPaneMinWidth = 840.dp
 private val TwoPaneMaxWidth = 1120.dp
 private val SummaryPaneWidth = 340.dp
@@ -77,23 +77,37 @@ fun DashboardScreen(
     onOpenSettings: () -> Unit = {},
     onShare: (ExportFormat) -> Unit = {},
 ) {
+    val layoutDirection = LocalLayoutDirection.current
+    val sides =
+        maxOf(
+            contentPadding.calculateLeftPadding(layoutDirection),
+            contentPadding.calculateRightPadding(layoutDirection),
+        )
+    val vertical =
+        PaddingValues(top = contentPadding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding())
     BoxWithConstraints(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         if (maxWidth >= TwoPaneMinWidth) {
             // Tablets, foldables and landscape: the score stays in view while the findings scroll beside it.
             Row(
-                Modifier.widthIn(max = TwoPaneMaxWidth).fillMaxSize().padding(contentPadding),
+                Modifier.widthIn(max = TwoPaneMaxWidth).fillMaxSize().padding(horizontal = sides),
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
             ) {
+                // Vertical insets go inside the scrolling panes so content can pass under the system bars.
                 Column(
-                    Modifier.width(SummaryPaneWidth).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    Modifier.width(SummaryPaneWidth).fillMaxHeight().verticalScroll(rememberScrollState())
+                        .padding(vertical),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Toolbar(onOpenHistory, onOpenSettings, onShare)
                     Summary(report, diff)
-                    if (report.app.debugBuild) DebugBanner()
                     ScanAgainButton(onScanAgain)
+                    if (report.app.debugBuild) DebugBanner()
                 }
-                LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                LazyColumn(
+                    Modifier.weight(1f).fillMaxHeight(),
+                    contentPadding = vertical,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
                     findingsAndCategories(report, onSelectCheck, onSelectCategory)
                 }
             }
@@ -105,9 +119,9 @@ fun DashboardScreen(
             ) {
                 item(key = "toolbar") { Toolbar(onOpenHistory, onOpenSettings, onShare) }
                 item(key = "summary") { Summary(report, diff) }
+                item(key = "scan-again") { ScanAgainButton(onScanAgain) }
                 if (report.app.debugBuild) item(key = "debug") { DebugBanner() }
                 findingsAndCategories(report, onSelectCheck, onSelectCategory)
-                item(key = "scan-again") { ScanAgainButton(onScanAgain) }
             }
         }
     }
@@ -118,35 +132,37 @@ private fun LazyListScope.findingsAndCategories(
     onSelectCheck: (CheckResult) -> Unit,
     onSelectCategory: (Category) -> Unit,
 ) {
-    val top = report.prioritizedFindings().take(TOP_FINDINGS)
+    val all = report.prioritizedFindings()
+    val top = all.take(TOP_FINDINGS)
     if (top.isNotEmpty()) {
         item(key = "fix-title") { SectionTitle(stringResource(R.string.section_fix_first)) }
         item(key = "fix-list") { ResultList(top, onSelect = onSelectCheck) }
-    }
-
-    item(key = "categories-title") { SectionTitle(stringResource(R.string.section_categories)) }
-    items(Category.entries.chunked(2), key = { row -> row.first().name }) { row ->
-        Row(
-            Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            for (category in row) {
-                CategoryCard(
-                    category,
-                    report.results.filter { it.id.category == category },
-                    onClick = { onSelectCategory(category) },
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+        if (all.size > top.size) {
+            item(key = "fix-more") {
+                Text(
+                    pluralStringResource(R.plurals.fix_more, all.size - top.size, all.size - top.size),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
+    }
+
+    item(key = "categories-title") { SectionTitle(stringResource(R.string.section_categories)) }
+    item(key = "categories") {
+        CategoryList(
+            Category.entries,
+            resultsFor = { category -> report.results.filter { it.id.category == category } },
+            onSelect = onSelectCategory,
+        )
     }
 }
 
 @Composable
 private fun ScanAgainButton(onScanAgain: () -> Unit) {
-    Button(
+    FilledTonalButton(
         onClick = onScanAgain,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = ListRowMinHeight),
     ) { Text(stringResource(R.string.action_scan_again)) }
 }
 
@@ -158,32 +174,31 @@ private fun Summary(report: ScanReport, diff: ReportDiff?) {
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ScoreRing(score.value, score.risk)
-        StatusBadge(
-            tone = tone,
-            icon = if (score.findingCount == 0) SecureIcons.Check else SecureIcons.Alert,
-            text = stringResource(score.risk.labelRes),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatusBadge(
+                tone = tone,
+                icon = if (score.findingCount == 0) SecureIcons.Check else SecureIcons.Alert,
+                text = stringResource(score.risk.labelRes),
+            )
+            Text(
+                if (score.findingCount == 0) {
+                    stringResource(R.string.summary_clean)
+                } else {
+                    pluralStringResource(R.plurals.findings_count, score.findingCount, score.findingCount)
+                },
+                style = MaterialTheme.typography.bodyLarge.merge(NumericStyle),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
         Text(
-            if (score.findingCount == 0) {
-                stringResource(R.string.summary_clean)
-            } else {
-                pluralStringResource(R.plurals.findings_count, score.findingCount, score.findingCount)
-            },
-            style = MaterialTheme.typography.bodyLarge.merge(NumericStyle),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            stringResource(R.string.coverage_label, score.coverage),
+            stringResource(R.string.coverage_label, score.coverage) + " · " +
+                stringResource(R.string.device_line, device.manufacturer, device.model, device.androidVersion),
             style = MaterialTheme.typography.bodyMedium.merge(NumericStyle),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            stringResource(R.string.device_line, device.manufacturer, device.model, device.androidVersion),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
         if (diff != null) SinceLastScan(diff)
     }
@@ -198,6 +213,7 @@ private fun DebugBanner() {
                 SecureIcons.Info,
                 contentDescription = null,
                 tint = tone.main,
+                modifier = Modifier.size(24.dp),
             )
             Text(
                 stringResource(R.string.debug_banner),
@@ -225,15 +241,17 @@ private fun SinceLastScan(diff: ReportDiff) {
             stringResource(R.string.dashboard_since_last),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
         Text(
             if (diff.hasChanges) {
                 stringResource(R.string.history_changes, diff.newFindings.size, diff.resolved.size)
             } else {
-                stringResource(R.string.history_no_changes)
+                stringResource(R.string.dashboard_no_changes)
             },
             style = MaterialTheme.typography.bodyMedium.merge(NumericStyle),
             color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
         )
     }
 }

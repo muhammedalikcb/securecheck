@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,6 +44,8 @@ import com.muhammedalikocabey.securecheck.R
 import com.muhammedalikocabey.securecheck.domain.settings.Settings
 import com.muhammedalikocabey.securecheck.domain.settings.ThemeMode
 import com.muhammedalikocabey.securecheck.presentation.AppActions
+import com.muhammedalikocabey.securecheck.presentation.components.ContentMaxWidth
+import com.muhammedalikocabey.securecheck.presentation.components.ListRowMinHeight
 import com.muhammedalikocabey.securecheck.presentation.components.OutlinedCard
 import com.muhammedalikocabey.securecheck.presentation.components.ScreenHeader
 import com.muhammedalikocabey.securecheck.presentation.components.SecureIcons
@@ -62,7 +65,7 @@ fun SettingsScreen(
     var confirmClear by rememberSaveable { mutableStateOf(false) }
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
-            Modifier.widthIn(max = 640.dp).fillMaxSize(),
+            Modifier.widthIn(max = ContentMaxWidth).fillMaxSize(),
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -110,8 +113,13 @@ fun SettingsScreen(
                 item(key = "language") {
                     OutlinedCard(Modifier.fillMaxWidth()) {
                         Row(
-                            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = openLanguage)
-                                .heightIn(min = 56.dp).padding(horizontal = 16.dp, vertical = 12.dp),
+                            Modifier.fillMaxWidth()
+                                .clickable(
+                                    onClickLabel = stringResource(R.string.action_open_system_settings),
+                                    role = Role.Button,
+                                    onClick = openLanguage,
+                                )
+                                .heightIn(min = ListRowMinHeight).padding(horizontal = 16.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(Modifier.weight(1f)) {
@@ -122,6 +130,7 @@ fun SettingsScreen(
                                 SecureIcons.External,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                     }
@@ -197,12 +206,11 @@ private fun SwitchRow(
     Row(
         Modifier.fillMaxWidth()
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onChange)
-            .heightIn(min = 56.dp)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA),
+            .heightIn(min = ListRowMinHeight)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f).alpha(if (enabled) 1f else DISABLED_ALPHA)) {
             RowTitle(title)
             RowDescription(description)
         }

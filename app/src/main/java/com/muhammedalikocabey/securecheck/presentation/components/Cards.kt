@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -23,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.muhammedalikocabey.securecheck.R
 import com.muhammedalikocabey.securecheck.domain.model.Category
@@ -46,17 +46,24 @@ fun OutlinedCard(modifier: Modifier = Modifier, content: @Composable ColumnScope
     }
 }
 
+/** [onClick] null makes a read-only row, so it is not announced as a button. */
 @Composable
-fun ResultRow(result: CheckResult, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ResultRow(result: CheckResult, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     val style = result.style()
     val statusLabel = stringResource(style.label)
     Row(
         modifier
             .fillMaxWidth()
-            .clickable(
-                onClickLabel = stringResource(R.string.action_show_details),
-                role = Role.Button,
-                onClick = onClick,
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        onClickLabel = stringResource(R.string.action_show_details),
+                        role = Role.Button,
+                        onClick = onClick,
+                    )
+                } else {
+                    Modifier
+                },
             )
             .semantics { stateDescription = statusLabel }
             .heightIn(min = 64.dp)
@@ -70,19 +77,25 @@ fun ResultRow(result: CheckResult, onClick: () -> Unit, modifier: Modifier = Mod
                 stringResource(result.id.text().title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 result.summary(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
             )
         }
-        Icon(
-            SecureIcons.Chevron,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
+        if (onClick != null) {
+            Icon(
+                SecureIcons.Chevron,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }
 
@@ -97,39 +110,59 @@ fun ResultList(results: List<CheckResult>, onSelect: (CheckResult) -> Unit, modi
     }
 }
 
+/** One row per category, in a single card, like the findings above it. */
 @Composable
-fun CategoryCard(category: Category, results: List<CheckResult>, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun CategoryList(
+    categories: List<Category>,
+    resultsFor: (Category) -> List<CheckResult>,
+    onSelect: (Category) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedCard(modifier.fillMaxWidth()) {
+        categories.forEachIndexed { index, category ->
+            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+            CategoryRow(category, resultsFor(category), onClick = { onSelect(category) })
+        }
+    }
+}
+
+@Composable
+private fun CategoryRow(category: Category, results: List<CheckResult>, onClick: () -> Unit) {
     val tone = categoryTone(results)
     val clear = results.count { it.status != CheckStatus.FINDING && it.status != CheckStatus.UNAVAILABLE }
-    val name = stringResource(category.labelRes)
-    val summary = stringResource(R.string.category_clear, clear, results.size)
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClickLabel = stringResource(R.string.action_show_details),
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .heightIn(min = 64.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(
-            Modifier
-                .fillMaxHeight()
-                .clickable(
-                    onClickLabel = stringResource(R.string.action_show_details),
-                    role = Role.Button,
-                    onClick = onClick,
-                )
-                .heightIn(min = 112.dp)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            StatusGlyph(tone, category.icon())
-            Column {
-                Text(name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                Text(
-                    summary,
-                    style = MaterialTheme.typography.bodyMedium.merge(NumericStyle),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        StatusGlyph(tone, category.icon())
+        Column(Modifier.weight(1f)) {
+            Text(
+                stringResource(category.labelRes),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                stringResource(R.string.category_clear, clear, results.size),
+                style = MaterialTheme.typography.bodyMedium.merge(NumericStyle),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
+        Icon(
+            SecureIcons.Chevron,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }

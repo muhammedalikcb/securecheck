@@ -91,6 +91,7 @@
     <string name="history_score">Score: %1$d</string>
     <string name="history_changes">New: %1$d · Fixed: %2$d</string>
     <string name="dashboard_since_last">Since your last scan</string>
+    <string name="dashboard_no_changes">Nothing has changed</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">Appearance</string>
@@ -113,4 +114,14 @@
     <string name="settings_about">About</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_privacy">Scans run on this device. There is no account and no server. A report leaves the device only when you share it.</string>
+    <string name="scan_failed_title">The scan could not finish</string>
+    <string name="scan_failed_desc">Something went wrong while checking this device. Nothing was saved. Try again.</string>
+    <plurals name="fix_more">
+        <item quantity="one">+%1$d more finding below, in the categories</item>
+        <item quantity="other">+%1$d more findings below, in the categories</item>
+    </plurals>
+    <string name="history_delta">Change since the previous scan: %1$s</string>
+    <string name="action_open_in_browser">Open in browser</string>
+    <string name="action_open_system_settings">Open system settings</string>
+    <string name="action_rerunning">Running check…</string>
 </resources>

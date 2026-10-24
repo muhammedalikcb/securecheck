@@ -2,6 +2,7 @@ package com.muhammedalikocabey.securecheck.presentation.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +20,11 @@ import com.muhammedalikocabey.securecheck.R
 /** Back button and page title shared by every screen that sits below the dashboard. */
 @Composable
 fun ScreenHeader(title: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        // The button has 12dp of built-in padding; pull it left so the arrow lines up with the cards.
+        modifier.fillMaxWidth().offset(x = (-12).dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
             Icon(SecureIcons.Back, contentDescription = stringResource(R.string.action_back))
         }

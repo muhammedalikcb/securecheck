@@ -21,12 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.muhammedalikocabey.securecheck.R
 import com.muhammedalikocabey.securecheck.domain.history.ReportDiff
 import com.muhammedalikocabey.securecheck.domain.model.ScanReport
+import com.muhammedalikocabey.securecheck.presentation.components.ContentMaxWidth
 import com.muhammedalikocabey.securecheck.presentation.components.OutlinedCard
 import com.muhammedalikocabey.securecheck.presentation.components.ScreenHeader
 import com.muhammedalikocabey.securecheck.presentation.components.SecureIcons
@@ -47,7 +50,7 @@ fun HistoryScreen(
 ) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
-            Modifier.widthIn(max = 640.dp).fillMaxSize(),
+            Modifier.widthIn(max = ContentMaxWidth).fillMaxSize(),
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -78,6 +81,8 @@ private fun HistoryRow(report: ScanReport, previous: ScanReport?) {
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     stringResource(R.string.history_score, score.value),
@@ -85,9 +90,11 @@ private fun HistoryRow(report: ScanReport, previous: ScanReport?) {
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 if (previous != null && score.value != previous.score.value) {
+                    val delta = signed(score.value - previous.score.value)
+                    val deltaDescription = stringResource(R.string.history_delta, delta)
                     Text(
-                        signed(score.value - previous.score.value),
-                        modifier = Modifier.padding(start = 8.dp),
+                        delta,
+                        modifier = Modifier.padding(start = 8.dp).semantics { contentDescription = deltaDescription },
                         style = MaterialTheme.typography.bodyMedium.merge(NumericStyle),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

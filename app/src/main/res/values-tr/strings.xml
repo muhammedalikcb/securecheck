@@ -91,6 +91,7 @@
     <string name="history_score">Puan: %1$d</string>
     <string name="history_changes">Yeni: %1$d · Giderilen: %2$d</string>
     <string name="dashboard_since_last">Son taramanızdan beri</string>
+    <string name="dashboard_no_changes">Hiçbir şey değişmedi</string>
 
     <string name="settings_title">Ayarlar</string>
     <string name="settings_appearance">Görünüm</string>
@@ -113,4 +114,14 @@
     <string name="settings_about">Hakkında</string>
     <string name="settings_version">Sürüm %1$s</string>
     <string name="settings_privacy">Taramalar bu cihazda çalışır. Hesap ve sunucu yoktur. Rapor, yalnızca siz paylaşırsanız cihazdan çıkar.</string>
+    <string name="scan_failed_title">Tarama tamamlanamadı</string>
+    <string name="scan_failed_desc">Bu cihaz kontrol edilirken bir sorun çıktı. Hiçbir şey kaydedilmedi. Tekrar dene.</string>
+    <plurals name="fix_more">
+        <item quantity="one">+%1$d bulgu daha, aşağıdaki kategorilerde</item>
+        <item quantity="other">+%1$d bulgu daha, aşağıdaki kategorilerde</item>
+    </plurals>
+    <string name="history_delta">Önceki taramaya göre değişim: %1$s</string>
+    <string name="action_open_in_browser">Tarayıcıda aç</string>
+    <string name="action_open_system_settings">Sistem ayarlarını aç</string>
+    <string name="action_rerunning">Kontrol çalışıyor…</string>
 </resources>

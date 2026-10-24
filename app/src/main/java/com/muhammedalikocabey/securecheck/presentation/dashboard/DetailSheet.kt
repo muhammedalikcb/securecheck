@@ -4,11 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -22,12 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.muhammedalikocabey.securecheck.R
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
 import com.muhammedalikocabey.securecheck.domain.model.CheckStatus
+import com.muhammedalikocabey.securecheck.presentation.components.ListRowMinHeight
 import com.muhammedalikocabey.securecheck.presentation.components.StatusBadge
 import com.muhammedalikocabey.securecheck.presentation.content.labelRes
 import com.muhammedalikocabey.securecheck.presentation.content.summary
@@ -37,7 +43,7 @@ private const val MASVS_CONTROLS = "https://mas.owasp.org/MASVS/controls/"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailSheet(result: CheckResult, onDismiss: () -> Unit, onRerun: () -> Unit) {
+fun DetailSheet(result: CheckResult, onDismiss: () -> Unit, onRerun: () -> Unit, rerunning: Boolean = false) {
     val text = result.id.text()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val uriHandler = LocalUriHandler.current
@@ -118,17 +124,28 @@ fun DetailSheet(result: CheckResult, onDismiss: () -> Unit, onRerun: () -> Unit)
                         style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+                    val openLabel = stringResource(R.string.action_open_in_browser)
                     TextButton(
                         onClick = { runCatching { uriHandler.openUri("$MASVS_CONTROLS$control/") } },
-                        modifier = Modifier.heightIn(min = 48.dp),
+                        modifier = Modifier.heightIn(min = 48.dp).semantics {
+                            onClick(label = openLabel, action = null)
+                        },
                         // No start padding, so the label lines up with the text above it.
                         contentPadding = PaddingValues(end = 12.dp),
                     ) { Text(stringResource(R.string.action_open_standard)) }
                 }
             }
 
-            OutlinedButton(onClick = onRerun, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-                Text(stringResource(R.string.action_rerun))
+            OutlinedButton(
+                onClick = onRerun,
+                enabled = !rerunning,
+                modifier = Modifier.fillMaxWidth().heightIn(min = ListRowMinHeight),
+            ) {
+                if (rerunning) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(stringResource(if (rerunning) R.string.action_rerunning else R.string.action_rerun))
             }
         }
     }

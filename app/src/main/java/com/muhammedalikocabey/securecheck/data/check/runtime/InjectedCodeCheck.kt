@@ -26,17 +26,24 @@ class InjectedCodeCheck @Inject constructor(private val files: ProcFiles, privat
         // These are match patterns for foreign mapped libraries, not paths this app opens.
         @SuppressLint("SdCardPath")
         private val UNTRUSTED_PREFIXES = listOf("/data/local/tmp/", "/sdcard/", "/storage/", "/mnt/")
+        private val CODE_SUFFIXES = listOf(".so", ".dex", ".jar", ".apk", ".odex", ".vdex", ".oat")
+        private const val DELETED_SUFFIX = " (deleted)"
         private val APP_DATA = Regex("^/data/(?:data|user/\\d+)/([^/]+)/")
 
         fun signals(paths: Set<String>, ownPackage: String): List<Signal> = buildList {
-            for (path in paths) {
+            // Fonts, databases and other data files are legitimately mapped from shared locations; only code counts.
+            for (path in paths.filter(::isCode)) {
                 val foreignData = APP_DATA.find(path)?.groupValues?.get(1)?.takeIf { it != ownPackage }
                 when {
                     UNTRUSTED_PREFIXES.any(path::startsWith) -> add(Signal("mapped from: $path", 3))
                     foreignData != null -> add(Signal("mapped from another app: $path", 3))
-                    path.endsWith(".so (deleted)") -> add(Signal("deleted library still mapped: $path", 2))
+                    path.endsWith(".so$DELETED_SUFFIX") -> add(Signal("deleted library still mapped: $path", 2))
                 }
             }
+        }
+
+        private fun isCode(path: String) = path.removeSuffix(DELETED_SUFFIX).let { name ->
+            CODE_SUFFIXES.any(name::endsWith)
         }
     }
 }

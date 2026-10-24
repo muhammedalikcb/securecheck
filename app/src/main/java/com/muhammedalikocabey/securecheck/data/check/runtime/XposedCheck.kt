@@ -36,6 +36,15 @@ class XposedCheck @Inject constructor(
             "de.robv.android.xposed.XposedBridge",
             "de.robv.android.xposed.XC_MethodHook",
         )
+
+        // Frames a hook framework puts on the stack. Matching on the bare word would also hit this class's own name.
+        private val HOOK_FRAME_PREFIXES = listOf(
+            "de.robv.android.xposed.",
+            "org.lsposed.",
+            "io.github.lsposed.",
+            "LSPHooker_",
+            "me.weishu.epic.",
+        )
         private val MAP_NEEDLES = listOf("XposedBridge", "lspd", "lsposed", "edxposed", "libriru")
         private val MANAGER_PACKAGES = listOf(
             "de.robv.android.xposed.installer",
@@ -55,7 +64,7 @@ class XposedCheck @Inject constructor(
             ProcessMaps.containsAny(maps, MAP_NEEDLES).forEach { add(Signal("mapped library: $it", 3)) }
             if (classPath.contains("XposedBridge", ignoreCase = true)) add(Signal("CLASSPATH names XposedBridge", 3))
             loadableClasses.forEach { add(Signal("class loadable: $it", 3)) }
-            stackClassNames.filter { it.contains("xposed", ignoreCase = true) }.distinct()
+            stackClassNames.filter { name -> HOOK_FRAME_PREFIXES.any(name::startsWith) }.distinct()
                 .forEach { add(Signal("stack frame: $it", 3)) }
             managers.forEach { add(Signal("manager package: $it", 2)) }
         }

@@ -264,6 +264,19 @@ class RuntimeSignalTest {
     }
 
     @Test
+    fun `this app's own xposed check class on the stack is not a signal`() {
+        val own = listOf(XposedCheck::class.java.name, "kotlinx.coroutines.DispatchedTask")
+        assertTrue(XposedCheck.signals(emptyList(), "", emptyList(), own, emptyList()).isEmpty())
+    }
+
+    @Test
+    fun `hook framework frames on the stack are a high confidence signal`() {
+        val frames = listOf("LSPHooker_.onCreate", "de.robv.android.xposed.XposedBridge")
+        val signals = XposedCheck.signals(emptyList(), "", emptyList(), frames, emptyList())
+        assertEquals(Confidence.HIGH, signals.confidence())
+    }
+
+    @Test
     fun `xposed manager package alone is medium confidence`() {
         val signals = XposedCheck.signals(emptyList(), "", emptyList(), emptyList(), listOf("org.lsposed.manager"))
         assertEquals(Confidence.MEDIUM, signals.confidence())
@@ -292,6 +305,22 @@ class RuntimeSignalTest {
         assertEquals(2, flagged.size)
         assertTrue(flagged.any { "inject.so" in it })
         assertTrue(flagged.any { "libhook.so" in it })
+    }
+
+    @Test
+    fun `data files mapped from another app are not injected code`() {
+        val paths = setOf(
+            "/data/user/0/com.google.android.gms/files/fonts/opentype/Noto_COLR_Emoji_Compat.ttf",
+            "/data/data/com.example.app/no_backup/androidx.work.workdb-shm",
+            "/storage/emulated/0/Download/sample.ttf",
+        )
+        assertTrue(InjectedCodeCheck.signals(paths, "com.example.app").isEmpty())
+    }
+
+    @Test
+    fun `dex or jar from a shared location is still flagged`() {
+        val paths = setOf("/sdcard/payload.dex", "/data/local/tmp/agent.jar")
+        assertEquals(2, InjectedCodeCheck.signals(paths, "com.example.app").size)
     }
 
     @Test

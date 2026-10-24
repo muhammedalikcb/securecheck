@@ -4,7 +4,7 @@ Pull requests are welcome: new checks, better heuristics for existing ones, test
 
 ## Setup
 
-JDK 17 and the Android SDK (compile SDK 36). Then:
+JDK 17 and the Android SDK (compile SDK 36). The Gradle daemon is pinned to JDK 17 in `gradle/gradle-daemon-jvm.properties`, so a newer system JDK is fine and a missing JDK 17 is downloaded automatically. Then:
 
 ```bash
 ./gradlew spotlessCheck lintDebug testDebugUnitTest assembleDebug

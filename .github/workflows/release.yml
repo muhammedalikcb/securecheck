@@ -49,7 +49,7 @@ jobs:
           sha256sum *.apk > SHA256SUMS.txt
 
       - name: Publish
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           tag_name: ${{ inputs.tag }}

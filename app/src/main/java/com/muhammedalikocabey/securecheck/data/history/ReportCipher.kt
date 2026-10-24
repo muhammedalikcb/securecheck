@@ -6,7 +6,6 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
 import java.security.ProviderException
-import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -34,13 +33,11 @@ interface ReportCipher {
  * Any tampering or a lost key fails the GCM tag check, which the store treats like a corrupt file and skips.
  */
 class AesGcmReportCipher(private val key: () -> SecretKey) : ReportCipher {
-    private val random = SecureRandom()
-
     override fun seal(plain: ByteArray): ByteArray = guarded {
-        val iv = ByteArray(IV_BYTES).also(random::nextBytes)
-        val cipher = Cipher.getInstance(TRANSFORMATION).apply {
-            init(Cipher.ENCRYPT_MODE, key(), GCMParameterSpec(TAG_BITS, iv))
-        }
+        // The Keystore refuses a caller-supplied IV for keys that require randomized encryption, so the cipher picks it.
+        val cipher = Cipher.getInstance(TRANSFORMATION).apply { init(Cipher.ENCRYPT_MODE, key()) }
+        val iv = cipher.iv
+        if (iv.size != IV_BYTES) throw IOException("Unexpected IV length")
         byteArrayOf(VERSION) + iv + cipher.doFinal(plain)
     }
 

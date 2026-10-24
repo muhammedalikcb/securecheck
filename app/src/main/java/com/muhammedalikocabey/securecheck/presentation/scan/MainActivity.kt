@@ -21,6 +21,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.muhammedalikocabey.securecheck.R
@@ -49,11 +50,14 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Swaps the launch theme for Theme.SecureCheck; without it the window keeps the splash theme and its action bar.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             val state by scan.state.collectAsStateWithLifecycle()
             val saved by history.reports.collectAsStateWithLifecycle()
             val prefs by settings.settings.collectAsStateWithLifecycle()
+            val rerunning by scan.rerunning.collectAsStateWithLifecycle()
             val dark = prefs.theme.isDark(isSystemInDarkTheme())
             // System bar icons follow the in-app theme, which can differ from the system one.
             DisposableEffect(dark) {
@@ -64,7 +68,7 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
             val actions = remember { buildActions() }
-            SecureCheckScreen(state, saved, prefs, actions)
+            SecureCheckScreen(state, saved, prefs, actions, rerunning)
         }
     }
 
@@ -74,7 +78,11 @@ class MainActivity : ComponentActivity() {
         onShare = ::share,
         onOpenHistory = history::refresh,
         onTheme = settings::setTheme,
-        onSaveHistory = settings::setSaveHistory,
+        onSaveHistory = { enabled ->
+            settings.setSaveHistory(enabled)
+            // A shared report is a copy of history; switching history off should not leave one behind.
+            if (!enabled) clearSharedReport()
+        },
         onDailyScan = { enabled ->
             settings.setDailyScan(enabled)
             if (enabled) askForNotifications()
@@ -82,6 +90,7 @@ class MainActivity : ComponentActivity() {
         onClearHistory = {
             settings.clearHistory()
             history.refresh()
+            clearSharedReport()
         },
         onOpenLanguage = if (Build.VERSION.SDK_INT >=
             Build.VERSION_CODES.TIRAMISU
@@ -91,6 +100,10 @@ class MainActivity : ComponentActivity() {
             null
         },
     )
+
+    private fun clearSharedReport() {
+        lifecycleScope.launch(Dispatchers.IO) { component.reportExporter().clear() }
+    }
 
     private fun askForNotifications() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return

@@ -9,10 +9,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -35,6 +37,7 @@ import com.muhammedalikocabey.securecheck.presentation.components.rememberReduce
 import com.muhammedalikocabey.securecheck.presentation.dashboard.CategoryScreen
 import com.muhammedalikocabey.securecheck.presentation.dashboard.DashboardScreen
 import com.muhammedalikocabey.securecheck.presentation.dashboard.DetailSheet
+import com.muhammedalikocabey.securecheck.presentation.dashboard.ScanFailed
 import com.muhammedalikocabey.securecheck.presentation.dashboard.ScanScreen
 import com.muhammedalikocabey.securecheck.presentation.history.HistoryScreen
 import com.muhammedalikocabey.securecheck.presentation.scan.ScanUiState
@@ -68,19 +71,26 @@ fun SecureCheckApp(
     history: List<ScanReport> = emptyList(),
     settings: Settings = Settings(),
     actions: AppActions = AppActions(),
+    rerunning: Set<CheckId> = emptySet(),
 ) {
     SecureCheckTheme(darkTheme = settings.theme.isDark(isSystemInDarkTheme())) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
-        ) {
-            Content(state, history, settings, actions)
+        // The surface fills the window so the cutout side is painted too; only its content is inset.
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))) {
+                Content(state, history, settings, actions, rerunning)
+            }
         }
     }
 }
 
 @Composable
-private fun Content(state: ScanUiState, history: List<ScanReport>, settings: Settings, actions: AppActions) {
+private fun Content(
+    state: ScanUiState,
+    history: List<ScanReport>,
+    settings: Settings,
+    actions: AppActions,
+    rerunning: Set<CheckId>,
+) {
     var category by rememberSaveable { mutableStateOf<Category?>(null) }
     var page by rememberSaveable { mutableStateOf<Page?>(null) }
     var selected by rememberSaveable { mutableStateOf<CheckId?>(null) }
@@ -123,7 +133,9 @@ private fun Content(state: ScanUiState, history: List<ScanReport>, settings: Set
         label = "screen",
     ) { target ->
         when (target) {
-            Screen.Scan -> {
+            Screen.Scan -> if (state is ScanUiState.Failed) {
+                ScanFailed(onRetry = actions.onScan, contentPadding = padding)
+            } else {
                 val scanning = state as? ScanUiState.Scanning
                 ScanScreen(
                     completed = scanning?.completed ?: 0,
@@ -172,6 +184,11 @@ private fun Content(state: ScanUiState, history: List<ScanReport>, settings: Set
 
     val shown = selected?.let { id -> report?.result(id) }
     if (shown != null) {
-        DetailSheet(shown, onDismiss = { selected = null }, onRerun = { actions.onRerun(shown.id) })
+        DetailSheet(
+            shown,
+            onDismiss = { selected = null },
+            onRerun = { actions.onRerun(shown.id) },
+            rerunning = shown.id in rerunning,
+        )
     }
 }

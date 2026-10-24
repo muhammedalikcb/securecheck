@@ -35,6 +35,11 @@ class ReportExporter @Inject constructor(private val context: Context) {
         return FileProvider.getUriForFile(context, authority(context), file)
     }
 
+    /** Removes the last export, so clearing history also clears the copy that was shared from it. */
+    fun clear() {
+        File(context.cacheDir, DIRECTORY).deleteRecursively()
+    }
+
     companion object {
         const val DIRECTORY = "exports"
 

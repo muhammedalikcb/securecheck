@@ -104,8 +104,10 @@ These are the reasons the app calls its results signals, not verdicts.
 * **Play Integrity and key attestation need a server.** The app can request a token and read a hardware key
   certificate, but only a backend can verify them. The app says so instead of claiming a verdict. See
   [docs/play-integrity-backend.md](docs/play-integrity-backend.md). No backend is included.
-* **History is not encrypted.** Reports sit in the app's private storage, are excluded from backups and device
-  transfers, and are readable only on a rooted device. If your threat model includes that, turn history off.
+* **History is encrypted at rest, not against a rooted device.** Reports are sealed with an AES-256-GCM key held in the
+  Android Keystore and are excluded from backups and device transfers. That protects a copied file or a stolen
+  backup. It does not protect against root, which can use the key while the app runs. If your threat model includes
+  that, turn history off. Reports saved by an earlier version stay readable and age out of the 30-report window.
 * **Exports contain the device model and technical evidence** (paths, package names). Review before sharing publicly.
 * **Verified with JVM and Robolectric tests**, not an instrumented run on every device and ROM. Heuristics vary by
   manufacturer, so please report false results with the issue template.

@@ -12,7 +12,7 @@ import java.io.IOException
 import java.util.Locale
 
 /**
- * One JSON file per report in the app's private storage, newest [limit] kept.
+ * One file per report in the app's private storage, newest [limit] kept. Each file is sealed by [cipher].
  *
  * Files are written to a temporary name and renamed, so a process kill mid-write leaves either the old state
  * or the new one, never a half-written report. The folder is kept out of backups by the backup rules.
@@ -20,6 +20,7 @@ import java.util.Locale
 class JsonFileReportStore(
     private val dir: File,
     private val limit: Int = DEFAULT_LIMIT,
+    private val cipher: ReportCipher = ReportCipher.None,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) : ReportStore {
     private val lock = Mutex()
@@ -29,7 +30,7 @@ class JsonFileReportStore(
             if (!dir.isDirectory && !dir.mkdirs()) throw IOException("Cannot create ${dir.name}")
             val target = File(dir, fileName(report))
             val temp = File(dir, "${target.name}.tmp")
-            temp.writeText(ReportJson.encode(report))
+            temp.writeBytes(cipher.seal(ReportJson.encode(report).toByteArray(Charsets.UTF_8)))
             if (!temp.renameTo(target)) {
                 temp.delete()
                 throw IOException("Cannot store report")
@@ -42,7 +43,7 @@ class JsonFileReportStore(
         withContext(io) {
             reportFiles().sortedByDescending { it.name }.mapNotNull { file ->
                 try {
-                    ReportJson.decode(file.readText())
+                    ReportJson.decode(String(cipher.open(file.readBytes()), Charsets.UTF_8))
                 } catch (_: IOException) {
                     null
                 }

@@ -12,6 +12,7 @@ import com.muhammedalikocabey.securecheck.data.check.app.SigningCertificates
 import com.muhammedalikocabey.securecheck.data.check.device.AndroidPackageLookup
 import com.muhammedalikocabey.securecheck.data.check.device.PackageLookup
 import com.muhammedalikocabey.securecheck.data.history.JsonFileReportStore
+import com.muhammedalikocabey.securecheck.data.history.KeystoreReportKey
 import com.muhammedalikocabey.securecheck.data.notify.AndroidChangeNotifier
 import com.muhammedalikocabey.securecheck.data.settings.PreferencesSettingsStore
 import com.muhammedalikocabey.securecheck.data.system.AndroidDebuggerProbe
@@ -81,7 +82,8 @@ abstract class AppModule {
 
         @Provides
         @Singleton
-        fun reportStore(context: Context): ReportStore = JsonFileReportStore(File(context.filesDir, "reports"))
+        fun reportStore(context: Context): ReportStore =
+            JsonFileReportStore(File(context.filesDir, "reports"), cipher = KeystoreReportKey.cipher())
 
         @Provides
         @Singleton

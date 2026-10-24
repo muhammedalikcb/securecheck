@@ -20,12 +20,15 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.muhammedalikocabey.securecheck.R
+import com.muhammedalikocabey.securecheck.domain.model.CheckId
 import com.muhammedalikocabey.securecheck.domain.model.CheckResult
 import com.muhammedalikocabey.securecheck.presentation.components.OutlinedCard
 import com.muhammedalikocabey.securecheck.presentation.components.ResultRow
+import com.muhammedalikocabey.securecheck.presentation.content.text
 import com.muhammedalikocabey.securecheck.presentation.theme.NumericStyle
 
 private const val RECENT = 5
+private const val RUNNING_SHOWN = 3
 
 /** Determinate progress, so the wait has a visible end. Results appear as they arrive. */
 @Composable
@@ -33,6 +36,7 @@ fun ScanScreen(
     completed: Int,
     total: Int,
     results: List<CheckResult>,
+    running: List<CheckId>,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -61,6 +65,16 @@ fun ScanScreen(
                         style = MaterialTheme.typography.titleMedium.merge(NumericStyle),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+                    if (running.isNotEmpty()) {
+                        val names = running.take(RUNNING_SHOWN).map {
+                            stringResource(it.text().title)
+                        }.joinToString(", ")
+                        Text(
+                            stringResource(R.string.scan_running, names),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                     Text(
                         stringResource(R.string.scan_hint),
                         style = MaterialTheme.typography.bodyMedium,

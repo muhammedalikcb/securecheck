@@ -21,7 +21,13 @@ import javax.inject.Inject
 sealed interface ScanUiState {
     data object Idle : ScanUiState
 
-    data class Scanning(val completed: Int, val total: Int, val results: List<CheckResult>) : ScanUiState
+    data class Scanning(
+        val completed: Int,
+        val total: Int,
+        val results: List<CheckResult>,
+        /** Checks that hold a slot right now, oldest first. */
+        val running: List<CheckId> = emptyList(),
+    ) : ScanUiState
 
     /** [diff] is how this scan differs from the previous saved one, or null when there is nothing to compare. */
     data class Done(val report: ScanReport, val diff: ReportDiff? = null) : ScanUiState
@@ -47,9 +53,23 @@ class ScanViewModel @Inject constructor(
             engine.scan().collect { event ->
                 when (event) {
                     is ScanEvent.Started -> _state.value = ScanUiState.Scanning(0, event.total, emptyList())
+                    is ScanEvent.CheckStarted -> _state.update { current ->
+                        if (current is ScanUiState.Scanning) {
+                            current.copy(
+                                running = current.running + event.id,
+                            )
+                        } else {
+                            current
+                        }
+                    }
                     is ScanEvent.CheckCompleted -> _state.update { current ->
-                        val results = (current as? ScanUiState.Scanning)?.results.orEmpty() + event.result
-                        ScanUiState.Scanning(event.completed, event.total, results)
+                        val scanning = current as? ScanUiState.Scanning
+                        ScanUiState.Scanning(
+                            event.completed,
+                            event.total,
+                            scanning?.results.orEmpty() + event.result,
+                            scanning?.running.orEmpty() - event.result.id,
+                        )
                     }
                     is ScanEvent.Finished ->
                         _state.value =

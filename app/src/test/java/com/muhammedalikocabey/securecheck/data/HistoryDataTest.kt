@@ -1,6 +1,7 @@
 package com.muhammedalikocabey.securecheck.data
 
 import com.muhammedalikocabey.securecheck.data.export.HtmlReport
+import com.muhammedalikocabey.securecheck.data.history.AesGcmReportCipher
 import com.muhammedalikocabey.securecheck.data.history.JsonFileReportStore
 import com.muhammedalikocabey.securecheck.data.history.ReportJson
 import com.muhammedalikocabey.securecheck.domain.model.CheckId
@@ -17,13 +18,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 
 class HistoryDataTest {
     @get:Rule
     val folder = TemporaryFolder()
 
     private fun store(limit: Int = 30) =
-        JsonFileReportStore(File(folder.root, "reports"), limit, Dispatchers.Unconfined)
+        JsonFileReportStore(File(folder.root, "reports"), limit, io = Dispatchers.Unconfined)
 
     @Test
     fun `report survives an encode and decode round trip`() {
@@ -81,6 +84,49 @@ class HistoryDataTest {
         File(folder.root, "reports/999999999999999-broken.json").writeText("garbage")
 
         assertEquals(listOf("good"), store.all().map { it.id })
+    }
+
+    private fun newKey(): SecretKey = KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
+
+    private fun encryptedStore(key: SecretKey) = JsonFileReportStore(
+        File(folder.root, "reports"),
+        cipher = AesGcmReportCipher { key },
+        io = Dispatchers.Unconfined,
+    )
+
+    private fun reportFile() = File(folder.root, "reports").listFiles { f -> f.name.endsWith(".json") }!!.single()
+
+    @Test
+    fun `encrypted reports round trip and hide their content on disk`() = runTest {
+        val store = encryptedStore(newKey())
+        store.save(reportOf("secret-id", 1_000, CheckId.ROOT))
+
+        assertEquals(listOf("secret-id"), store.all().map { it.id })
+        val onDisk = String(reportFile().readBytes(), Charsets.ISO_8859_1)
+        assertFalse(onDisk.contains("secret-id"))
+        assertFalse(onDisk.contains("ROOT"))
+    }
+
+    @Test
+    fun `reports saved before encryption existed are still read`() = runTest {
+        val key = newKey()
+        store().save(reportOf("legacy", 1_000))
+        val store = encryptedStore(key)
+        store.save(reportOf("fresh", 2_000))
+
+        assertEquals(listOf("fresh", "legacy"), store.all().map { it.id })
+    }
+
+    @Test
+    fun `a tampered file and a file sealed with another key are skipped`() = runTest {
+        val store = encryptedStore(newKey())
+        store.save(reportOf("good", 2_000))
+        store.save(reportOf("tampered", 1_000))
+        val tampered = File(folder.root, "reports").listFiles()!!.first { it.name.contains("tampered") }
+        tampered.writeBytes(tampered.readBytes().also { it[it.size - 1] = (it[it.size - 1].toInt() xor 1).toByte() })
+
+        assertEquals(listOf("good"), store.all().map { it.id })
+        assertTrue(encryptedStore(newKey()).all().isEmpty())
     }
 
     @Test

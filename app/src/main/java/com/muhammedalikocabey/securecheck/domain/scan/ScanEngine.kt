@@ -40,7 +40,10 @@ class ScanEngine @Inject constructor(
         coroutineScope {
             ordered.map { check ->
                 async {
-                    val result = gate.withPermit { execute(check) }
+                    val result = gate.withPermit {
+                        send(ScanEvent.CheckStarted(check.id))
+                        execute(check)
+                    }
                     synchronized(results) {
                         results += result
                         ScanEvent.CheckCompleted(result, results.size, ordered.size)

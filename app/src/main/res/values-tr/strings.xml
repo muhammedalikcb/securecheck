@@ -40,6 +40,7 @@
 
     <string name="scan_title">Cihaz taranıyor</string>
     <string name="scan_progress">Kontrol %1$d / %2$d</string>
+    <string name="scan_running">Şu an: %1$s</string>
     <string name="scan_hint">Tüm kontroller bu cihazda çalışır. Telefondan hiçbir veri çıkmaz.</string>
 
     <string name="score_out_of">/ 100</string>
@@ -101,7 +102,7 @@
     <string name="settings_daily_desc">Pil azalmamışken günde yaklaşık bir kez çalışır. Yalnızca yeni bir bulgu çıkarsa bildirim alırsınız.</string>
     <string name="settings_daily_needs_history">Günlük tarama için geçmişi açın.</string>
     <string name="settings_history">Tarama geçmişini kaydet</string>
-    <string name="settings_history_desc">En yeni 30 raporu yalnızca bu cihazda tutar.</string>
+    <string name="settings_history_desc">En yeni 30 raporu yalnızca bu cihazda, şifreli olarak tutar.</string>
     <string name="settings_clear">Geçmişi temizle</string>
     <string name="settings_clear_title">Kayıtlı tüm raporlar silinsin mi?</string>
     <string name="settings_clear_body">Kayıtlı her tarama bu cihazdan silinir. Bu işlem geri alınamaz.</string>

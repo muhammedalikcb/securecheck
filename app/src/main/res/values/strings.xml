@@ -40,6 +40,7 @@
 
     <string name="scan_title">Scanning this device</string>
     <string name="scan_progress">Check %1$d of %2$d</string>
+    <string name="scan_running">Now checking: %1$s</string>
     <string name="scan_hint">Every check runs on this device. Nothing leaves the phone.</string>
 
     <string name="score_out_of">out of 100</string>
@@ -101,7 +102,7 @@
     <string name="settings_daily_desc">Runs about once a day while the battery is not low. You are notified only when a new finding appears.</string>
     <string name="settings_daily_needs_history">Turn on history to use the daily scan.</string>
     <string name="settings_history">Save scan history</string>
-    <string name="settings_history_desc">Keeps the newest 30 reports on this device only.</string>
+    <string name="settings_history_desc">Keeps the newest 30 reports on this device only, encrypted.</string>
     <string name="settings_clear">Clear history</string>
     <string name="settings_clear_title">Delete all saved reports?</string>
     <string name="settings_clear_body">Every saved scan is removed from this device. This cannot be undone.</string>

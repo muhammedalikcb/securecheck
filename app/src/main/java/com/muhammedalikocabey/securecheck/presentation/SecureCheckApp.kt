@@ -125,7 +125,13 @@ private fun Content(state: ScanUiState, history: List<ScanReport>, settings: Set
         when (target) {
             Screen.Scan -> {
                 val scanning = state as? ScanUiState.Scanning
-                ScanScreen(scanning?.completed ?: 0, scanning?.total ?: 0, scanning?.results.orEmpty(), padding)
+                ScanScreen(
+                    completed = scanning?.completed ?: 0,
+                    total = scanning?.total ?: 0,
+                    results = scanning?.results.orEmpty(),
+                    running = scanning?.running.orEmpty(),
+                    contentPadding = padding,
+                )
             }
             Screen.Dashboard -> report?.let {
                 DashboardScreen(

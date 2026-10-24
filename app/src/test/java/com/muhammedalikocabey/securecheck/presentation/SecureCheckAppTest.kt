@@ -31,6 +31,7 @@ import com.muhammedalikocabey.securecheck.domain.scan.ScoreCalculator
 import com.muhammedalikocabey.securecheck.domain.settings.Settings
 import com.muhammedalikocabey.securecheck.domain.settings.ThemeMode
 import com.muhammedalikocabey.securecheck.presentation.content.labelRes
+import com.muhammedalikocabey.securecheck.presentation.content.text
 import com.muhammedalikocabey.securecheck.presentation.scan.ScanUiState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -158,8 +159,16 @@ class SecureCheckAppTest {
     @Test
     fun `scanning shows determinate progress`() {
         val results = listOf(CheckResult.passed(CheckId.SCREEN_LOCK), CheckResult.passed(CheckId.ROOT))
-        show(ScanUiState.Scanning(completed = 2, total = CheckId.entries.size, results = results))
+        val running = listOf(CheckId.FRIDA, CheckId.USER_CA)
+        show(ScanUiState.Scanning(completed = 2, total = CheckId.entries.size, results = results, running = running))
         rule.onNodeWithText(string(R.string.scan_progress, 2, CheckId.entries.size)).assertIsDisplayed()
+        rule.onNodeWithText(
+            string(
+                R.string.scan_running,
+                "${string(CheckId.FRIDA.text().title)}, ${string(CheckId.USER_CA.text().title)}",
+            ),
+        )
+            .assertIsDisplayed()
         rule.onNodeWithText(string(R.string.scan_hint)).assertIsDisplayed()
         screenshot("scanning-en")
     }

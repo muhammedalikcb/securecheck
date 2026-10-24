@@ -43,6 +43,10 @@ class ScanEngineTest {
 
         assertEquals(ScanEvent.Started(2), events.first())
         assertEquals(2, events.filterIsInstance<ScanEvent.CheckCompleted>().size)
+        assertEquals(
+            setOf(CheckId.VPN, CheckId.ROOT),
+            events.filterIsInstance<ScanEvent.CheckStarted>().map { it.id }.toSet(),
+        )
         val report = (events.last() as ScanEvent.Finished).report
         assertEquals(listOf(CheckId.ROOT, CheckId.VPN), report.results.map { it.id })
         assertEquals(1, report.score.findingCount)

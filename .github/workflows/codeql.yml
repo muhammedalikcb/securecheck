@@ -27,7 +27,7 @@ jobs:
           languages: java-kotlin
           build-mode: manual
 
-      - run: ./gradlew assembleDebug
+      - run: ./gradlew clean assembleDebug --no-build-cache
 
       - uses: github/codeql-action/analyze@v3
         with:

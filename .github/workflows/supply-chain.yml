@@ -41,7 +41,7 @@ jobs:
           format: cyclonedx
           output: securecheck.cdx.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: securecheck.cdx.json
